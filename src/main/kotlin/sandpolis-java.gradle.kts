@@ -60,3 +60,15 @@ tasks.withType<Test> {
 tasks.withType<JavaExec> {
 	jvmArgs("--enable-preview")
 }
+
+// Add repository configuration
+repositories {
+	mavenLocal()
+	mavenCentral()
+}
+
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+}
