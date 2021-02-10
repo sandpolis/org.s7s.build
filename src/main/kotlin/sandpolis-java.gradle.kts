@@ -66,9 +66,3 @@ repositories {
 	mavenLocal()
 	mavenCentral()
 }
-
-buildscript {
-	repositories {
-		mavenCentral()
-	}
-}
