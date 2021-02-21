@@ -43,10 +43,13 @@ protobuf {
 				id("java") {
 					option("lite")
 				}
-				if (findProject(":com.sandpolis.agent.micro") != null) {
+				if (findProject(":com.sandpolis.agent.nano") != null) {
 					id("cpp") {
 						option("lite")
 					}
+				}
+				if (findProject(":com.sandpolis.agent.micro") != null) {
+					id("rust")
 				}
 				if (findProject(":com.sandpolis.client.lockstone") != null) {
 					id("swift")
