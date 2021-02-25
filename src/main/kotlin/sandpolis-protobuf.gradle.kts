@@ -50,6 +50,21 @@ protobuf {
 				}
 				if (findProject(":com.sandpolis.agent.micro") != null) {
 					id("rust")
+
+					// Post-process generated rust to fix import paths. Remove this when
+					// https://github.com/stepancheg/rust-protobuf/issues/409 is fixed.
+					val fixRustImports by tasks.creating(DefaultTask::class) {
+						dependsOn(tasks.findByName("generateProto"))
+						doLast {
+							project.fileTree("gen/main/rust").forEach {
+								it.writeText(it.readText()
+									.replace("super::platform::OsType", "crate::core::foundation::platform::OsType")
+									.replace("super::auth::KeyContainer", "crate::core::instance::auth::KeyContainer")
+									.replace("super::auth::PasswordContainer", "crate::core::instance::auth::PasswordContainer"))
+							}
+						}
+					}
+					tasks.findByName("assemble")?.dependsOn(fixRustImports)
 				}
 				if (findProject(":com.sandpolis.client.lockstone") != null) {
 					id("swift")
