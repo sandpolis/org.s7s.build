@@ -60,7 +60,9 @@ protobuf {
 								it.writeText(it.readText()
 									.replace("super::platform::OsType", "crate::core::foundation::platform::OsType")
 									.replace("super::auth::KeyContainer", "crate::core::instance::auth::KeyContainer")
-									.replace("super::auth::PasswordContainer", "crate::core::instance::auth::PasswordContainer"))
+									.replace("super::auth::PasswordContainer", "crate::core::instance::auth::PasswordContainer")
+									.replace("super::metatypes::InstanceType", "crate::core::instance::metatypes::InstanceType")
+									.replace("super::metatypes::InstanceFlavor", "crate::core::instance::metatypes::InstanceFlavor"))
 							}
 						}
 					}
