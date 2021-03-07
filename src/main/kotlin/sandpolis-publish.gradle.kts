@@ -17,7 +17,7 @@ publishing {
 	publications {
 		create<MavenPublication>("mavenJava") {
 			groupId = "com.sandpolis"
-			artifactId = project.base.archivesBaseName
+			artifactId = project.name.toString().replace("com.sandpolis.", "")
 			version = project.version.toString()
 
 			if (project.name.startsWith("com.sandpolis.plugin")) {
