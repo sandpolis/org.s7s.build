@@ -29,7 +29,7 @@ publishing {
 			pom {
 				name.set(project.name)
 				description.set("${project.name} module")
-				url.set("https://github.com/sandpolis/sandpolis")
+				url.set("https://github.com/sandpolis/${project.name}")
 				licenses {
 					license {
 						name.set("Mozilla Public License, Version 2.0")
@@ -44,23 +44,25 @@ publishing {
 					}
 				}
 				scm {
-					connection.set("scm:git:git://github.com/sandpolis/sandpolis.git")
-					developerConnection.set("scm:git:ssh://git@github.com/sandpolis/sandpolis.git")
-					url.set("https://github.com/sandpolis/sandpolis")
+					connection.set("scm:git:git://github.com/sandpolis/${project.name}.git")
+					developerConnection.set("scm:git:ssh://git@github.com/sandpolis/${project.name}.git")
+					url.set("https://github.com/sandpolis/${project.name}")
 				}
 			}
 		}
 	}
 	repositories {
 		maven {
-			url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
+			name = "GitHubPackages"
+			url = uri("https://maven.pkg.github.com/sandpolis/${project.name}")
 			credentials {
-				username = project.properties["publishing.sonatype.username"].toString()
-				password = project.properties["publishing.sonatype.password"].toString()
+				username = System.getenv("GITHUB_ACTOR")
+				password = System.getenv("GITHUB_TOKEN")
 			}
 		}
 	}
 }
 signing {
+	useInMemoryPgpKeys(System.getenv("SIGNING_PGP_KEY") ?: "", System.getenv("SIGNING_PGP_PASSWORD") ?: "")
 	sign(publishing.publications["mavenJava"])
 }
