@@ -23,9 +23,6 @@ val writeSoi by tasks.creating(DefaultTask::class) {
 		// Instance version
 		props.setProperty("instance.version", project.version.toString())
 
-		// Core version
-		props.setProperty("core.version", project(":module:com.sandpolis.core.instance").version.toString())
-
 		// Build platform
 		props.setProperty("build.platform", "${System.getProperty("os.name")} (${System.getProperty("os.arch")})")
 
@@ -36,9 +33,15 @@ val writeSoi by tasks.creating(DefaultTask::class) {
 		props.setProperty("build.gradle.version", project.getGradle().getGradleVersion())
 
 		// Module dependencies
-		props.setProperty("build.dependencies", project.getConfigurations().getByName("runtimeClasspath").getResolvedConfiguration().getResolvedArtifacts().stream().map {
-			it.getModuleVersion().getId().getGroup() + ":" + it.getModuleVersion().getId().getName() + ":" + it.getModuleVersion().getId().getVersion()
-		}.collect(Collectors.joining(",")))
+		props.setProperty("build.dependencies", project
+			.getConfigurations()
+			.getByName("runtimeClasspath")
+			.getResolvedConfiguration()
+			.getResolvedArtifacts().stream().map {
+				it.getModuleVersion().getId()
+			}.map {
+				it.getGroup() + ":" + it.getName() + ":" + it.getVersion()
+			}.collect(Collectors.joining(",")))
 
 		// Write object
 		project.file("src/main/resources").mkdirs()
