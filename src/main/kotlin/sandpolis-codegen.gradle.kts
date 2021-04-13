@@ -33,44 +33,17 @@ fun processAttribute(oidClass: TypeSpec.Builder, document: JsonObject, attribute
         ClassName.bestGuess(attribute.string("type"))
 
     // Add the attribute's OID field
-    var initializer = CodeBlock.of("new AbsoluteOid<>(\"\$L\", \"\$L\")", project.name,
-            document.string("name") + "/" + attribute.string("name"))
-
-    // Add type data
-    initializer = CodeBlock.of("\$L.setData(\$T.TYPE, \$T.class)", initializer,
-            ClassName.get("com.sandpolis.core.instance.state.oid", "OidData"), type)
-
-    // Add singularity data
-    if (attribute.boolean("list") == true) {
-        initializer = CodeBlock.of("\$L.setData(\$T.SINGULARITY, false)", initializer,
-                ClassName.get("com.sandpolis.core.instance.state.oid", "OidData"))
-    }
-
-    // Add identity data
-    if (attribute.boolean("immutable") == true) {
-        initializer = CodeBlock.of("\$L.setData(\$T.IMMUTABLE, true)", initializer,
-                ClassName.get("com.sandpolis.core.instance.state.oid", "OidData"))
-    }
-
-    // Add osquery data
-    if (attribute.string("osquery") != null) {
-        initializer = CodeBlock.of("\$L.setData(\$T.OSQUERY, \"\$L\")", initializer,
-                ClassName.get("com.sandpolis.core.instance.state.oid", "OidData"), attribute.string("osquery"))
-    }
+    var initializer = CodeBlock.of("Oid.of(\"\$L:\$L\")", project.name, document.string("name") + "/" + attribute.string("name"))
 
     // Create fields
     val field = FieldSpec
-            .builder(ParameterizedTypeName.get(ClassName.get(OID_PACKAGE, "AbsoluteOid"),
-                    ParameterizedTypeName.get(ClassName.get(ST_PACKAGE, "STAttribute"),
-                            type)),
+            .builder(ClassName.get(OID_PACKAGE, "Oid"),
                     attribute.string("name"), Modifier.PUBLIC, Modifier.FINAL)
             .initializer(attribute.string("name")!!.toUpperCase())
     oidClass.addField(field.build())
 
     val staticField = FieldSpec
-            .builder(ParameterizedTypeName.get(ClassName.get(OID_PACKAGE, "AbsoluteOid"),
-                    ParameterizedTypeName.get(ClassName.get(ST_PACKAGE, "STAttribute"),
-                            type)),
+            .builder(ClassName.get(OID_PACKAGE, "Oid"),
                     attribute.string("name")!!.toUpperCase(), Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
             .initializer(initializer)
     oidClass.addField(staticField.build())
@@ -83,12 +56,11 @@ fun generateDocument(parent: TypeSpec.Builder?, document: JsonObject): TypeSpec.
 
     val attributes: JsonArray<JsonObject>? = document.array("attributes")
 
-    val oidClass = TypeSpec.classBuilder(className + "Oid").addModifiers(Modifier.PUBLIC).superclass(ParameterizedTypeName
-            .get(ClassName.get(OID_PACKAGE, "AbsoluteOid"), ClassName.get(ST_PACKAGE, "STDocument")))
+    val oidClass = TypeSpec.classBuilder(className + "Oid").addModifiers(Modifier.PUBLIC).superclass(ClassName.get(OID_PACKAGE, "Oid"))
 
     // Add constructor
     val constructor = MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC).addParameter(String::class.java, "path")
-            .addStatement("super(\"\$L\", path)", project.name)
+            .addStatement("super(\"\$L\", path.replaceAll(\"^/+\", \"\").split(\"/\"))", project.name)
     oidClass.addMethod(constructor.build())
 
     if (parent != null) {
@@ -137,6 +109,9 @@ project.afterEvaluate {
 
                 // Root class
                 val root = generateDocument(null, JsonObject(mapOf("name" to "Instance")))
+
+                //
+                root.addField(FieldSpec.builder(ClassName.get(project.name + ".state", "InstanceOid"), "root", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL).initializer("new InstanceOid(\"\")").build())
 
                 // Add root method
                 val rootMethod = MethodSpec.methodBuilder("InstanceOid").addModifiers(Modifier.PUBLIC, Modifier.STATIC)
