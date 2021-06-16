@@ -21,7 +21,7 @@ publishing {
 			version = project.version.toString()
 
 			if (project.name.startsWith("com.sandpolis.plugin")) {
-				//artifact(pluginArchive)
+				artifact(project.tasks.getByName("pluginArchive"))
 			} else {
 				from(components["java"])
 			}
