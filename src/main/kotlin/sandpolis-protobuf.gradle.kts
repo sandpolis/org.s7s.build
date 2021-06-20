@@ -43,12 +43,12 @@ protobuf {
 				id("java") {
 					option("lite")
 				}
-				if (findProject(":com.sandpolis.agent.nano") != null) {
+				if (System.getenv("S7S_BUILD_PROTO_CPP") == "1") {
 					id("cpp") {
 						option("lite")
 					}
 				}
-				if (findProject(":com.sandpolis.agent.micro") != null) {
+				if (System.getenv("S7S_BUILD_PROTO_RUST") == "1") {
 					id("rust")
 
 					// Post-process generated rust to fix import paths. Remove this when
@@ -68,7 +68,7 @@ protobuf {
 					}
 					tasks.findByName("assemble")?.dependsOn(fixRustImports)
 				}
-				if (findProject(":com.sandpolis.client.lockstone") != null) {
+				if (System.getenv("S7S_BUILD_PROTO_SWIFT") == "1") {
 					id("swift")
 				}
 			}
@@ -81,4 +81,43 @@ tasks {
 	javadoc {
 		setFailOnError(false)
 	}
+}
+
+// Create separate rust artifact
+if (System.getenv("S7S_BUILD_PROTO_RUST") == "1") {
+	val protoZipRust by tasks.creating(Zip::class) {
+		from("gen/main/rust")
+		archiveClassifier.set("rust")
+	}
+	project.afterEvaluate {
+		protoZipRust.dependsOn(tasks.findByName("generateProto"))
+	}
+}
+
+// Create separate swift artifact
+if (System.getenv("S7S_BUILD_PROTO_SWIFT") == "1") {
+	val protoZipSwift by tasks.creating(Zip::class) {
+		from("gen/main/swift")
+		archiveClassifier.set("swift")
+	}
+	project.afterEvaluate {
+		protoZipSwift.dependsOn(tasks.findByName("generateProto"))
+	}
+}
+
+// Create separate c++ artifact
+if (System.getenv("S7S_BUILD_PROTO_CPP") == "1") {
+	val protoZipCpp by tasks.creating(Zip::class) {
+		from("gen/main/cpp")
+		archiveClassifier.set("cpp")
+	}
+	project.afterEvaluate {
+		protoZipCpp.dependsOn(tasks.findByName("generateProto"))
+	}
+}
+
+project.afterEvaluate {
+
+	// Add explicit dependency to supress Gradle warning
+	tasks.findByName("sourcesJar")?.dependsOn(tasks.findByName("generateProto"))
 }

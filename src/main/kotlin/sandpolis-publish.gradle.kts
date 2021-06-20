@@ -13,6 +13,11 @@ plugins {
 	id("signing")
 }
 
+// Locate additional artifact tasks if they exist
+val protoZipRust = tasks.findByName("protoZipRust") as? Zip
+val protoZipSwift = tasks.findByName("protoZipSwift") as? Zip
+val protoZipCpp = tasks.findByName("protoZipCpp") as? Zip
+
 publishing {
 	publications {
 		create<MavenPublication>("mavenJava") {
@@ -50,6 +55,36 @@ publishing {
 				}
 			}
 		}
+
+		if (protoZipRust != null) {
+			create<MavenPublication>("mavenRust") {
+				groupId = "com.sandpolis"
+				artifactId = project.name.toString().replace("com.sandpolis.", "") + "-rust"
+				version = project.version.toString()
+
+				artifact(protoZipRust)
+			}
+		}
+
+		if (protoZipSwift != null) {
+			create<MavenPublication>("mavenSwift") {
+				groupId = "com.sandpolis"
+				artifactId = project.name.toString().replace("com.sandpolis.", "") + "-swift"
+				version = project.version.toString()
+
+				artifact(protoZipSwift)
+			}
+		}
+
+		if (protoZipCpp != null) {
+			create<MavenPublication>("mavenCpp") {
+				groupId = "com.sandpolis"
+				artifactId = project.name.toString().replace("com.sandpolis.", "") + "-cpp"
+				version = project.version.toString()
+
+				artifact(protoZipCpp)
+			}
+		}
 	}
 	repositories {
 		maven {
@@ -64,5 +99,7 @@ publishing {
 }
 signing {
 	useInMemoryPgpKeys(System.getenv("SIGNING_PGP_KEY") ?: "", System.getenv("SIGNING_PGP_PASSWORD") ?: "")
-	sign(publishing.publications["mavenJava"])
+	publishing.publications.forEach {
+		sign(it)
+	}
 }
