@@ -86,38 +86,32 @@ tasks {
 // Create separate rust artifact
 if (System.getenv("S7S_BUILD_PROTO_RUST") == "1") {
 	val protoZipRust by tasks.creating(Zip::class) {
+		dependsOn("generateProto")
+
 		from("gen/main/rust")
 		archiveClassifier.set("rust")
-	}
-	project.afterEvaluate {
-		protoZipRust.dependsOn(tasks.findByName("generateProto"))
 	}
 }
 
 // Create separate swift artifact
 if (System.getenv("S7S_BUILD_PROTO_SWIFT") == "1") {
 	val protoZipSwift by tasks.creating(Zip::class) {
+		dependsOn("generateProto")
+
 		from("gen/main/swift")
 		archiveClassifier.set("swift")
-	}
-	project.afterEvaluate {
-		protoZipSwift.dependsOn(tasks.findByName("generateProto"))
 	}
 }
 
 // Create separate c++ artifact
 if (System.getenv("S7S_BUILD_PROTO_CPP") == "1") {
 	val protoZipCpp by tasks.creating(Zip::class) {
+		dependsOn("generateProto")
+
 		from("gen/main/cpp")
 		archiveClassifier.set("cpp")
 	}
-	project.afterEvaluate {
-		protoZipCpp.dependsOn(tasks.findByName("generateProto"))
-	}
 }
 
-project.afterEvaluate {
-
-	// Add explicit dependency to supress Gradle warning
-	tasks.findByName("sourcesJar")?.dependsOn(tasks.findByName("generateProto"))
-}
+// Add explicit dependency to supress Gradle warning
+tasks.findByName("sourcesJar")?.dependsOn("generateProto")
