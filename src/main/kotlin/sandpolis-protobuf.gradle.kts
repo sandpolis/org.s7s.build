@@ -81,35 +81,35 @@ tasks {
 	javadoc {
 		setFailOnError(false)
 	}
+}
 
-	// Create separate rust artifact
-	if (System.getenv("S7S_BUILD_PROTO_RUST") == "1") {
-		named<Zip>("protoZipRust") {
-			dependsOn("generateProto")
+// Create separate rust artifact
+if (System.getenv("S7S_BUILD_PROTO_RUST") == "1") {
+	val protoZipRust by tasks.creating(Zip::class) {
+		dependsOn("generateProto")
 
-			from("gen/main/rust")
-			archiveAppendix.set("rust")
-		}
+		from("gen/main/rust")
+		archiveAppendix.set("rust")
 	}
+}
 
-	// Create separate swift artifact
-	if (System.getenv("S7S_BUILD_PROTO_SWIFT") == "1") {
-		named<Zip>("protoZipSwift") {
-			dependsOn("generateProto")
+// Create separate swift artifact
+if (System.getenv("S7S_BUILD_PROTO_SWIFT") == "1") {
+	val protoZipSwift by tasks.creating(Zip::class) {
+		dependsOn("generateProto")
 
-			from("gen/main/swift")
-			archiveAppendix.set("swift")
-		}
+		from("gen/main/swift")
+		archiveAppendix.set("swift")
 	}
+}
 
-	// Create separate c++ artifact
-	if (System.getenv("S7S_BUILD_PROTO_CPP") == "1") {
-		named<Zip>("protoZipCpp") {
-			dependsOn("generateProto")
+// Create separate c++ artifact
+if (System.getenv("S7S_BUILD_PROTO_CPP") == "1") {
+	val protoZipCpp by tasks.creating(Zip::class) {
+		dependsOn("generateProto")
 
-			from("gen/main/cpp")
-			archiveAppendix.set("cpp")
-		}
+		from("gen/main/cpp")
+		archiveAppendix.set("cpp")
 	}
 }
 
