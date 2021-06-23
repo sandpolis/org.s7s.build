@@ -66,7 +66,6 @@ protobuf {
 							}
 						}
 					}
-					tasks.findByName("assemble")?.dependsOn(fixRustImports)
 				}
 				if (System.getenv("S7S_BUILD_PROTO_SWIFT") == "1") {
 					id("swift")
@@ -87,6 +86,7 @@ tasks {
 if (System.getenv("S7S_BUILD_PROTO_RUST") == "1") {
 	val protoZipRust by tasks.creating(Zip::class) {
 		dependsOn("generateProto")
+		dependsOn("fixRustImports")
 
 		from("gen/main/rust")
 		archiveAppendix.set("rust")
