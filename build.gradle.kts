@@ -10,6 +10,7 @@
 
 plugins {
 	`kotlin-dsl`
+	kotlin("plugin.serialization") version "1.5.20"
 }
 
 repositories {
@@ -27,7 +28,5 @@ dependencies {
 	// For sandpolis-codegen plugin
 	implementation("com.squareup:javapoet:1.11.1")
 	implementation("com.google.guava:guava:30.1-jre")
-
-	// Use this library temporarily until the JSON compiler plugin works
-	implementation("com.beust:klaxon:5.4")
+	implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
 }
