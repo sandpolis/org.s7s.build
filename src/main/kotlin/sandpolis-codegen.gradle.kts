@@ -80,7 +80,7 @@ class OidClass(val path: String) {
             t.addMethod(
                 MethodSpec
                     .constructorBuilder()
-                    .addModifiers(PUBLIC)
+                    .addModifiers(PRIVATE)
                     .addParameter(String::class.java, "path")
                     .addStatement("super(\"\$L\", path.replaceAll(\"^/+\", \"\").split(\"/\"))", project.name)
                     .build()
@@ -95,7 +95,7 @@ class OidClass(val path: String) {
                         PUBLIC,
                         FINAL
                     )
-                    .initializer("new \$L(\"\$L\")", className, path)
+                    .initializer("new \$L(\$L\"/\$L\")", className, if (path.count { it == '/'} > 2) "pathString() + " else "" , className.removeSuffix("Oid").toLowerCase())
                     .build()
             )
 
@@ -169,25 +169,28 @@ fun processAttributes(oidClass: TypeSpec.Builder, document: DocumentSpec) {
             throw RuntimeException("Invalid name: " + attr.name)
         }
 
-        // Add the attribute's OID field
-        val initializer = CodeBlock.of("Oid.of(\"\$L:\$L\")", project.name, document.name + "/" + attr.name)
-
         // Create fields
-        val field = FieldSpec
-            .builder(
-                ClassName.get("com.sandpolis.core.instance.state.oid", "Oid"),
-                attr.name, PUBLIC, FINAL
-            )
-            .initializer(attr.name.toUpperCase())
-        oidClass.addField(field.build())
+        oidClass.addField(
+            FieldSpec
+                .builder(
+                    ClassName.get("com.sandpolis.core.instance.state.oid", "Oid"),
+                    attr.name, PUBLIC, FINAL
+                )
+                .addJavadoc(attr.description ?: "")
+                .initializer(CodeBlock.of("relative(\"\$L\")", attr.name))
+                .build()
+        )
 
-        val staticField = FieldSpec
-            .builder(
-                ClassName.get("com.sandpolis.core.instance.state.oid", "Oid"),
-                attr.name.toUpperCase(), PUBLIC, FINAL, STATIC
-            )
-            .initializer(initializer)
-        oidClass.addField(staticField.build())
+        oidClass.addField(
+            FieldSpec
+                .builder(
+                    ClassName.get("com.sandpolis.core.instance.state.oid", "Oid"),
+                    attr.name.toUpperCase(), PUBLIC, FINAL, STATIC
+                )
+                .addJavadoc(attr.description ?: "")
+                .initializer(CodeBlock.of("Oid.of(\"\$L:\$L\")", project.name, document.name + "/" + attr.name))
+                .build()
+        )
     }
 }
 
