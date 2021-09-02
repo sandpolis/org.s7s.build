@@ -13,11 +13,6 @@ plugins {
 	id("signing")
 }
 
-// Locate additional artifact tasks if they exist
-val protoZipRust = tasks.findByName("protoZipRust") as? Zip
-val protoZipSwift = tasks.findByName("protoZipSwift") as? Zip
-val protoZipCpp = tasks.findByName("protoZipCpp") as? Zip
-
 publishing {
 	publications {
 		create<MavenPublication>("mavenJava") {
@@ -56,34 +51,54 @@ publishing {
 			}
 		}
 
-		if (protoZipRust != null) {
+		tasks.findByName("protoZipRust")?.let {
 			create<MavenPublication>("mavenRust") {
 				groupId = "com.sandpolis"
 				artifactId = project.name.toString().replace("com.sandpolis.", "") + "-rust"
 				version = project.version.toString()
 
-				artifact(protoZipRust)
+				artifact(it as Zip)
 			}
 		}
 
-		if (protoZipSwift != null) {
+		tasks.findByName("protoZipSwift")?.let {
 			create<MavenPublication>("mavenSwift") {
 				groupId = "com.sandpolis"
 				artifactId = project.name.toString().replace("com.sandpolis.", "") + "-swift"
 				version = project.version.toString()
 
-				artifact(protoZipSwift)
+				artifact(it as Zip)
 			}
 		}
 
-		if (protoZipCpp != null) {
+		tasks.findByName("protoZipCpp")?.let {
 			create<MavenPublication>("mavenCpp") {
 				groupId = "com.sandpolis"
 				artifactId = project.name.toString().replace("com.sandpolis.", "") + "-cpp"
 				version = project.version.toString()
 
-				artifact(protoZipCpp)
+				artifact(it as Zip)
 			}
+		}
+
+		tasks.findByName("microLinuxAmd64")?.let {
+			create<MavenPublication>("mavenMicroAgentLinuxAmd64") {
+				groupId = "com.sandpolis"
+				artifactId = "agent-linux-amd64"
+				version = project.version.toString()
+
+				artifact(project.file("target/release/agent"))
+			}
+			tasks.findByName("mavenMicroAgentLinuxAmd64")?.dependsOn(it)
+
+			create<MavenPublication>("mavenMicroBootagentLinuxAmd64") {
+				groupId = "com.sandpolis"
+				artifactId = "bootagent-linux-amd64"
+				version = project.version.toString()
+
+				artifact(project.file("target/release/bootagent"))
+			}
+			tasks.findByName("mavenMicroBootagentLinuxAmd64")?.dependsOn(it)
 		}
 	}
 	repositories {

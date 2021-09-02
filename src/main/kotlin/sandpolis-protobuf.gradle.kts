@@ -53,7 +53,7 @@ protobuf {
 
 					// Post-process generated rust to fix import paths. Remove this when
 					// https://github.com/stepancheg/rust-protobuf/issues/409 is fixed.
-					val fixRustImports by tasks.creating(DefaultTask::class) {
+					tasks.register("fixRustImports") {
 						dependsOn(tasks.findByName("generateProto"))
 						doLast {
 							project.fileTree("gen/main/rust").forEach {
@@ -84,7 +84,7 @@ tasks {
 
 // Create separate rust artifact
 if (System.getenv("S7S_BUILD_PROTO_RUST") == "1") {
-	val protoZipRust by tasks.creating(Zip::class) {
+	tasks.register<Zip>("protoZipRust") {
 		dependsOn("generateProto")
 		dependsOn("fixRustImports")
 
@@ -95,7 +95,7 @@ if (System.getenv("S7S_BUILD_PROTO_RUST") == "1") {
 
 // Create separate swift artifact
 if (System.getenv("S7S_BUILD_PROTO_SWIFT") == "1") {
-	val protoZipSwift by tasks.creating(Zip::class) {
+	tasks.register<Zip>("protoZipSwift") {
 		dependsOn("generateProto")
 
 		from("gen/main/swift")
@@ -105,7 +105,7 @@ if (System.getenv("S7S_BUILD_PROTO_SWIFT") == "1") {
 
 // Create separate c++ artifact
 if (System.getenv("S7S_BUILD_PROTO_CPP") == "1") {
-	val protoZipCpp by tasks.creating(Zip::class) {
+	tasks.register<Zip>("protoZipCpp") {
 		dependsOn("generateProto")
 
 		from("gen/main/cpp")

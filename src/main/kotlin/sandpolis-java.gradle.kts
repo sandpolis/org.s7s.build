@@ -64,8 +64,6 @@ repositories {
 }
 
 // Clear eclipse bin directory on "clean"
-val cleanBin by tasks.creating(Delete::class) {
-	delete("bin")
+tasks.findByName("clean")?.doLast {
+	delete("bin")	
 }
-
-tasks.findByName("clean")?.dependsOn(cleanBin)
