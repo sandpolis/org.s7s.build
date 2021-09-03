@@ -65,5 +65,5 @@ repositories {
 
 // Clear eclipse bin directory on "clean"
 tasks.findByName("clean")?.doLast {
-	delete("bin")	
+	delete("bin")
 }

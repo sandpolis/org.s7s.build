@@ -15,38 +15,40 @@ plugins {
 
 publishing {
 	publications {
-		create<MavenPublication>("mavenJava") {
-			groupId = "com.sandpolis"
-			artifactId = project.name.toString().replace("com.sandpolis.", "")
-			version = project.version.toString()
+		tasks.findByName("jar")?.let {
+			create<MavenPublication>("mavenJava") {
+				groupId = "com.sandpolis"
+				artifactId = project.name.toString().replace("com.sandpolis.", "")
+				version = project.version.toString()
 
-			if (project.name.startsWith("com.sandpolis.plugin")) {
-				artifact(project.tasks.getByName("pluginArchive"))
-			} else {
-				from(components["java"])
-			}
+				if (project.name.startsWith("com.sandpolis.plugin")) {
+					artifact(project.tasks.getByName("pluginArchive"))
+				} else {
+					from(components["java"])
+				}
 
-			pom {
-				name.set(project.name)
-				description.set("${project.name} module")
-				url.set("https://github.com/sandpolis/${project.name}")
-				licenses {
-					license {
-						name.set("Mozilla Public License, Version 2.0")
-						url.set("https://mozilla.org/MPL/2.0")
-					}
-				}
-				developers {
-					developer {
-						id.set("cilki")
-						name.set("Tyler Cook")
-						email.set("tcc@sandpolis.com")
-					}
-				}
-				scm {
-					connection.set("scm:git:git://github.com/sandpolis/${project.name}.git")
-					developerConnection.set("scm:git:ssh://git@github.com/sandpolis/${project.name}.git")
+				pom {
+					name.set(project.name)
+					description.set("${project.name} module")
 					url.set("https://github.com/sandpolis/${project.name}")
+					licenses {
+						license {
+							name.set("Mozilla Public License, Version 2.0")
+							url.set("https://mozilla.org/MPL/2.0")
+						}
+					}
+					developers {
+						developer {
+							id.set("cilki")
+							name.set("Tyler Cook")
+							email.set("tcc@sandpolis.com")
+						}
+					}
+					scm {
+						connection.set("scm:git:git://github.com/sandpolis/${project.name}.git")
+						developerConnection.set("scm:git:ssh://git@github.com/sandpolis/${project.name}.git")
+						url.set("https://github.com/sandpolis/${project.name}")
+					}
 				}
 			}
 		}
@@ -79,26 +81,6 @@ publishing {
 
 				artifact(it as Zip)
 			}
-		}
-
-		tasks.findByName("microLinuxAmd64")?.let {
-			create<MavenPublication>("mavenMicroAgentLinuxAmd64") {
-				groupId = "com.sandpolis"
-				artifactId = "agent-linux-amd64"
-				version = project.version.toString()
-
-				artifact(project.file("target/release/agent"))
-			}
-			tasks.findByName("mavenMicroAgentLinuxAmd64")?.dependsOn(it)
-
-			create<MavenPublication>("mavenMicroBootagentLinuxAmd64") {
-				groupId = "com.sandpolis"
-				artifactId = "bootagent-linux-amd64"
-				version = project.version.toString()
-
-				artifact(project.file("target/release/bootagent"))
-			}
-			tasks.findByName("mavenMicroBootagentLinuxAmd64")?.dependsOn(it)
 		}
 	}
 	repositories {

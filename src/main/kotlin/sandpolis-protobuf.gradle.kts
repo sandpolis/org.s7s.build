@@ -50,22 +50,6 @@ protobuf {
 				}
 				if (System.getenv("S7S_BUILD_PROTO_RUST") == "1") {
 					id("rust")
-
-					// Post-process generated rust to fix import paths. Remove this when
-					// https://github.com/stepancheg/rust-protobuf/issues/409 is fixed.
-					tasks.register("fixRustImports") {
-						dependsOn(tasks.findByName("generateProto"))
-						doLast {
-							project.fileTree("gen/main/rust").forEach {
-								it.writeText(it.readText()
-									.replace("super::platform::OsType", "crate::core::foundation::platform::OsType")
-									.replace("super::auth::KeyContainer", "crate::core::instance::auth::KeyContainer")
-									.replace("super::auth::PasswordContainer", "crate::core::instance::auth::PasswordContainer")
-									.replace("super::metatypes::InstanceType", "crate::core::instance::metatypes::InstanceType")
-									.replace("super::metatypes::InstanceFlavor", "crate::core::instance::metatypes::InstanceFlavor"))
-							}
-						}
-					}
 				}
 				if (System.getenv("S7S_BUILD_PROTO_SWIFT") == "1") {
 					id("swift")
