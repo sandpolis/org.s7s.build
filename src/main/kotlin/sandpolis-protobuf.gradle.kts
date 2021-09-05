@@ -54,6 +54,9 @@ protobuf {
 				if (System.getenv("S7S_BUILD_PROTO_SWIFT") == "1") {
 					id("swift")
 				}
+				if (System.getenv("S7S_BUILD_PROTO_PYTHON") == "1") {
+					id("python")
+				}
 			}
 		}
 	}
@@ -94,6 +97,16 @@ if (System.getenv("S7S_BUILD_PROTO_CPP") == "1") {
 
 		from("gen/main/cpp")
 		archiveAppendix.set("cpp")
+	}
+}
+
+// Create separate python artifact
+if (System.getenv("S7S_BUILD_PROTO_PYTHON") == "1") {
+	tasks.register<Zip>("protoZipPython") {
+		dependsOn("generateProto")
+
+		from("gen/main/python")
+		archiveAppendix.set("python")
 	}
 }
 

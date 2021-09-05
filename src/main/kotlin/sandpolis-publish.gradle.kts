@@ -82,6 +82,16 @@ publishing {
 				artifact(it as Zip)
 			}
 		}
+
+		tasks.findByName("protoZipPython")?.let {
+			create<MavenPublication>("mavenPython") {
+				groupId = "com.sandpolis"
+				artifactId = project.name.toString().replace("com.sandpolis.", "") + "-python"
+				version = project.version.toString()
+
+				artifact(it as Zip)
+			}
+		}
 	}
 	repositories {
 		maven {
