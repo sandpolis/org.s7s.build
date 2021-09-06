@@ -73,7 +73,6 @@ tasks {
 if (System.getenv("S7S_BUILD_PROTO_RUST") == "1") {
 	tasks.register<Zip>("protoZipRust") {
 		dependsOn("generateProto")
-		dependsOn("fixRustImports")
 
 		from("gen/main/rust")
 		archiveAppendix.set("rust")
