@@ -1,7 +1,5 @@
-**/gen/main/cpp
-**/gen/main/java
-**/gen/main/swift
-**/src/main/resources/build.properties
+**/src/gen
+**/src/main/resources/build.json
 *.iml
 *.ipr
 *.iws

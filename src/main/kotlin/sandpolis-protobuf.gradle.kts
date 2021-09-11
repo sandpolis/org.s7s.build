@@ -9,6 +9,7 @@
 //============================================================================//
 
 import com.google.protobuf.gradle.*
+import java.nio.file.Files
 
 plugins {
 	id("java")
@@ -18,8 +19,7 @@ plugins {
 sourceSets {
 	main {
 		java {
-			srcDirs("src/main/proto")
-			srcDirs("gen/main/java")
+			srcDirs("src/gen/java")
 		}
 	}
 }
@@ -29,13 +29,8 @@ protobuf {
 		artifact = "com.google.protobuf:protoc:3.14.0"
 	}
 
-	generatedFilesBaseDir = "$projectDir/gen/"
+	generatedFilesBaseDir = "$projectDir/src/gen/"
 
-	tasks {
-		clean {
-			delete(generatedFilesBaseDir)
-		}
-	}
 	generateProtoTasks {
 		ofSourceSet("main").forEach { task ->
 			task.builtins {
@@ -58,6 +53,14 @@ protobuf {
 					id("python")
 				}
 			}
+
+			// Move generated output
+			task.doLast {
+				file("src/gen/main").listFiles().forEach {
+					Files.move(it.toPath(), file("src/gen").toPath().resolve(it.name))
+				}
+				file("src/gen/main").delete()
+			}
 		}
 	}
 }
@@ -74,7 +77,7 @@ if (System.getenv("S7S_BUILD_PROTO_RUST") == "1") {
 	tasks.register<Zip>("protoZipRust") {
 		dependsOn("generateProto")
 
-		from("gen/main/rust")
+		from("src/gen/rust")
 		archiveAppendix.set("rust")
 	}
 }
@@ -84,7 +87,7 @@ if (System.getenv("S7S_BUILD_PROTO_SWIFT") == "1") {
 	tasks.register<Zip>("protoZipSwift") {
 		dependsOn("generateProto")
 
-		from("gen/main/swift")
+		from("src/gen/swift")
 		archiveAppendix.set("swift")
 	}
 }
@@ -94,7 +97,7 @@ if (System.getenv("S7S_BUILD_PROTO_CPP") == "1") {
 	tasks.register<Zip>("protoZipCpp") {
 		dependsOn("generateProto")
 
-		from("gen/main/cpp")
+		from("src/gen/cpp")
 		archiveAppendix.set("cpp")
 	}
 }
@@ -104,10 +107,14 @@ if (System.getenv("S7S_BUILD_PROTO_PYTHON") == "1") {
 	tasks.register<Zip>("protoZipPython") {
 		dependsOn("generateProto")
 
-		from("gen/main/python")
+		from("src/gen/python")
 		archiveAppendix.set("python")
 	}
 }
 
 // Add explicit dependency to supress Gradle warning
 tasks.findByName("sourcesJar")?.dependsOn("generateProto")
+
+tasks.findByName("clean")?.doLast {
+	delete("src/gen")
+}
