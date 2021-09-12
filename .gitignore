@@ -3,6 +3,8 @@
 *.iml
 *.ipr
 *.iws
+*.log
+*.rs.bk
 .AppleDouble
 .apt_generated
 .classpath
@@ -14,5 +16,8 @@
 .project
 .settings
 .vagrant
+__pycache__
 bin
 build
+node_modules
+target

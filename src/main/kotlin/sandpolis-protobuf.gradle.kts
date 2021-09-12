@@ -10,6 +10,7 @@
 
 import com.google.protobuf.gradle.*
 import java.nio.file.Files
+import com.google.common.io.MoreFiles
 
 plugins {
 	id("java")
@@ -57,7 +58,11 @@ protobuf {
 			// Move generated output
 			task.doLast {
 				file("src/gen/main").listFiles().forEach {
-					Files.move(it.toPath(), file("src/gen").toPath().resolve(it.name))
+					val dest = file("src/gen").toPath().resolve(it.name)
+					if (Files.exists(dest)) {
+						MoreFiles.deleteRecursively(dest)
+					}
+					Files.move(it.toPath(), dest)
 				}
 				file("src/gen/main").delete()
 			}

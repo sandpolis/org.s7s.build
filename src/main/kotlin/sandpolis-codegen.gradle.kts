@@ -217,8 +217,13 @@ project.afterEvaluate {
             }
         }
 
-        // Setup task dependencies
+        // Generated sources are required for compilation
         tasks.findByName("compileJava")?.dependsOn(generateOids)
+
+        // Temporarily required because generateProto deletes src/gen/java
+        project.tasks.findByName("generateProto")?.let {
+            generateOids.dependsOn(it)
+        }
 
         // Remove generated sources in clean task
         tasks.findByName("clean")?.doLast {
