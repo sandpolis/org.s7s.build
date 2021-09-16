@@ -15,81 +15,66 @@ plugins {
 
 publishing {
 	publications {
-		tasks.findByName("jar")?.let {
-			create<MavenPublication>("mavenJava") {
-				groupId = "com.sandpolis"
-				artifactId = project.name.toString().replace("com.sandpolis.", "")
-				version = project.version.toString()
+		create<MavenPublication>(project.name.split(".").last()) {
+			groupId = "com.sandpolis"
+			artifactId = project.name.replace("com.sandpolis.", "")
+			version = project.version.toString()
 
-				if (project.name.startsWith("com.sandpolis.plugin")) {
-					artifact(project.tasks.getByName("pluginArchive"))
-				} else {
-					from(components["java"])
+			pom {
+				name.set(project.name)
+				description.set("${project.name} module")
+				url.set("https://github.com/sandpolis/${project.name}")
+				licenses {
+					license {
+						name.set("Mozilla Public License, Version 2.0")
+						url.set("https://mozilla.org/MPL/2.0")
+					}
 				}
-
-				pom {
-					name.set(project.name)
-					description.set("${project.name} module")
+				developers {
+					developer {
+						id.set("cilki")
+						name.set("Tyler Cook")
+						email.set("tcc@sandpolis.com")
+					}
+				}
+				scm {
+					connection.set("scm:git:git://github.com/sandpolis/${project.name}.git")
+					developerConnection.set("scm:git:ssh://git@github.com/sandpolis/${project.name}.git")
 					url.set("https://github.com/sandpolis/${project.name}")
-					licenses {
-						license {
-							name.set("Mozilla Public License, Version 2.0")
-							url.set("https://mozilla.org/MPL/2.0")
-						}
-					}
-					developers {
-						developer {
-							id.set("cilki")
-							name.set("Tyler Cook")
-							email.set("tcc@sandpolis.com")
-						}
-					}
-					scm {
-						connection.set("scm:git:git://github.com/sandpolis/${project.name}.git")
-						developerConnection.set("scm:git:ssh://git@github.com/sandpolis/${project.name}.git")
-						url.set("https://github.com/sandpolis/${project.name}")
-					}
 				}
 			}
-		}
 
-		tasks.findByName("protoZipRust")?.let {
-			create<MavenPublication>("mavenRust") {
-				groupId = "com.sandpolis"
-				artifactId = project.name.toString().replace("com.sandpolis.", "") + "-rust"
-				version = project.version.toString()
+			// Use this for the maven publication
+			// from(components["java"])
 
+			tasks.findByName("pluginArchive")?.let {
+				artifact(it as Zip)
+			} ?: tasks.findByName("jar")?.let {
 				artifact(it as Zip)
 			}
-		}
 
-		tasks.findByName("protoZipSwift")?.let {
-			create<MavenPublication>("mavenSwift") {
-				groupId = "com.sandpolis"
-				artifactId = project.name.toString().replace("com.sandpolis.", "") + "-swift"
-				version = project.version.toString()
-
-				artifact(it as Zip)
+			tasks.findByName("protoZipRust")?.let {
+				artifact(it as Zip) {
+					classifier = "rust"
+				}
 			}
-		}
 
-		tasks.findByName("protoZipCpp")?.let {
-			create<MavenPublication>("mavenCpp") {
-				groupId = "com.sandpolis"
-				artifactId = project.name.toString().replace("com.sandpolis.", "") + "-cpp"
-				version = project.version.toString()
-
-				artifact(it as Zip)
+			tasks.findByName("protoZipSwift")?.let {
+				artifact(it as Zip) {
+					classifier = "swift"
+				}
 			}
-		}
 
-		tasks.findByName("protoZipPython")?.let {
-			create<MavenPublication>("mavenPython") {
-				groupId = "com.sandpolis"
-				artifactId = project.name.toString().replace("com.sandpolis.", "") + "-python"
-				version = project.version.toString()
+			tasks.findByName("protoZipCpp")?.let {
+				artifact(it as Zip) {
+					classifier = "cpp"
+				}
+			}
 
-				artifact(it as Zip)
+			tasks.findByName("protoZipPython")?.let {
+				artifact(it as Zip) {
+					classifier = "python"
+				}
 			}
 		}
 	}
@@ -104,9 +89,12 @@ publishing {
 		}
 	}
 }
-signing {
-	useInMemoryPgpKeys(System.getenv("SIGNING_PGP_KEY") ?: "", System.getenv("SIGNING_PGP_PASSWORD") ?: "")
-	publishing.publications.forEach {
-		sign(it)
+
+if (System.getenv("S7S_NO_SIGNING") != "1") {
+	signing {
+		useInMemoryPgpKeys(System.getenv("SIGNING_PGP_KEY") ?: "", System.getenv("SIGNING_PGP_PASSWORD") ?: "")
+		publishing.publications.forEach {
+			sign(it)
+		}
 	}
 }

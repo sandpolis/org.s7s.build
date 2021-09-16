@@ -39,19 +39,16 @@ protobuf {
 				id("java") {
 					option("lite")
 				}
-				if (System.getenv("S7S_BUILD_PROTO_CPP") == "1") {
-					id("cpp") {
-						option("lite")
-					}
+				id("cpp") {
+					option("lite")
 				}
+				id("python")
+
 				if (System.getenv("S7S_BUILD_PROTO_RUST") == "1") {
 					id("rust")
 				}
 				if (System.getenv("S7S_BUILD_PROTO_SWIFT") == "1") {
 					id("swift")
-				}
-				if (System.getenv("S7S_BUILD_PROTO_PYTHON") == "1") {
-					id("python")
 				}
 			}
 
@@ -98,23 +95,19 @@ if (System.getenv("S7S_BUILD_PROTO_SWIFT") == "1") {
 }
 
 // Create separate c++ artifact
-if (System.getenv("S7S_BUILD_PROTO_CPP") == "1") {
-	tasks.register<Zip>("protoZipCpp") {
-		dependsOn("generateProto")
+tasks.register<Zip>("protoZipCpp") {
+	dependsOn("generateProto")
 
-		from("src/gen/cpp")
-		archiveAppendix.set("cpp")
-	}
+	from("src/gen/cpp")
+	archiveAppendix.set("cpp")
 }
 
 // Create separate python artifact
-if (System.getenv("S7S_BUILD_PROTO_PYTHON") == "1") {
-	tasks.register<Zip>("protoZipPython") {
-		dependsOn("generateProto")
+tasks.register<Zip>("protoZipPython") {
+	dependsOn("generateProto")
 
-		from("src/gen/python")
-		archiveAppendix.set("python")
-	}
+	from("src/gen/python")
+	archiveAppendix.set("python")
 }
 
 // Add explicit dependency to supress Gradle warning
