@@ -14,13 +14,14 @@ plugins {
 }
 
 repositories {
+	mavenLocal()
 	gradlePluginPortal()
 }
 
 dependencies {
 
 	// For sandpolis-protobuf plugin
-	implementation("com.google.protobuf:protobuf-gradle-plugin:0.8.14")
+	implementation("com.google.protobuf:protobuf-gradle-plugin:0.8.17")
 
 	// For sandpolis-module plugin
 	implementation("org.ajoberstar.grgit:grgit-core:4.1.0")

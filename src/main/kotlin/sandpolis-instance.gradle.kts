@@ -24,7 +24,8 @@ data class BuildConfig(
 	val gradle_version: String,
 	val java_version: String? = null,
 	val kotlin_version: String? = null,
-	val rust_version: String? = null
+	val rust_version: String? = null,
+	val dependencies: List<String>?
 )
 
 val writeBuildConfig by tasks.creating(DefaultTask::class) {
@@ -45,19 +46,22 @@ val writeBuildConfig by tasks.creating(DefaultTask::class) {
 			gradle_version=project.getGradle().getGradleVersion(),
 
 			// Java version
-			java_version="${System.getProperty("java.version")} (${System.getProperty("java.vendor")})"
-		)
+			java_version="${System.getProperty("java.version")} (${System.getProperty("java.vendor")})",
 
-		// Module dependencies
-		/*props.setProperty("build.dependencies", project
-			.getConfigurations()
-			.getByName("runtimeClasspath")
-			.getResolvedConfiguration()
-			.getResolvedArtifacts().stream().map {
-				it.getModuleVersion().getId()
-			}.map {
-				it.getGroup() + ":" + it.getName() + ":" + it.getVersion()
-			}.collect(Collectors.joining(",")))*/
+			// Runtime dependencies
+			dependencies=project
+				.getConfigurations()
+				.getByName("runtimeClasspath")
+				?.getResolvedConfiguration()
+				.getResolvedArtifacts()
+				.stream().map {
+					if (it.classifier != null) {
+						"${it.moduleVersion.id.group}:${it.moduleVersion.id.name}:${it.moduleVersion.id.version}:${it.classifier}"
+					} else {
+						"${it.moduleVersion.id.group}:${it.moduleVersion.id.name}:${it.moduleVersion.id.version}"
+					}
+				}.toList()
+		)
 
 		// Write object
 		if (project.file("res").exists()) {
@@ -70,3 +74,29 @@ val writeBuildConfig by tasks.creating(DefaultTask::class) {
 }
 
 tasks.findByName("processResources")?.dependsOn(writeBuildConfig)
+
+// Add configuration for protobuf artifacts in non-Java instances
+val proto by configurations.creating
+
+val extractDownloadedProto by tasks.creating(Copy::class) {
+	doLast {
+		for (id in listOf("cpp", "python", "rust", "swift")) {
+			proto.files.filter { it.name.endsWith("-${id}.zip") }.forEach { dep ->
+				copy {
+					from(zipTree(dep))
+					into("src/gen/${id}")
+				}
+			}
+		}
+	}
+}
+tasks.findByName("assemble")?.dependsOn(extractDownloadedProto)
+
+tasks.findByName("jar")?.let {
+	task<Sync>("assembleLib") {
+		dependsOn(it)
+		from(configurations.getByName("runtimeClasspath"))
+		from(it)
+		into("${buildDir}/lib")
+	}
+}

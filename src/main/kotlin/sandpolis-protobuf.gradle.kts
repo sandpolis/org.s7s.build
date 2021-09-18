@@ -8,9 +8,9 @@
 //                                                                            //
 //============================================================================//
 
+import com.google.common.io.MoreFiles
 import com.google.protobuf.gradle.*
 import java.nio.file.Files
-import com.google.common.io.MoreFiles
 
 plugins {
 	id("java")
@@ -27,41 +27,55 @@ sourceSets {
 
 protobuf {
 	protoc {
-		artifact = "com.google.protobuf:protoc:3.14.0"
+		artifact = "com.google.protobuf:protoc:3.18.0"
 	}
 
-	generatedFilesBaseDir = "$projectDir/src/gen/"
+	generatedFilesBaseDir = "${buildDir}/generated-proto"
 
 	generateProtoTasks {
 		ofSourceSet("main").forEach { task ->
 			task.builtins {
-				remove("java")
-				id("java") {
+				getByName("java") {
 					option("lite")
+					setOutputSubDir("java.zip")
 				}
-				id("cpp") {
-					option("lite")
+
+				if (System.getenv("S7S_BUILD_PROTO_CPP") == "1") {
+					id("cpp") {
+						option("lite")
+						setOutputSubDir("cpp.zip")
+					}
 				}
-				id("python")
+
+				if (System.getenv("S7S_BUILD_PROTO_PYTHON") == "1") {
+					id("python") {
+						setOutputSubDir("python.zip")
+					}
+				}
 
 				if (System.getenv("S7S_BUILD_PROTO_RUST") == "1") {
-					id("rust")
+					id("rust") {
+						setOutputSubDir("rust.zip")
+					}
 				}
+
 				if (System.getenv("S7S_BUILD_PROTO_SWIFT") == "1") {
-					id("swift")
+					id("swift") {
+						setOutputSubDir("swift.zip")
+					}
 				}
 			}
 
-			// Move generated output
+			// Extract generated archives to src/gen
 			task.doLast {
-				file("src/gen/main").listFiles().forEach {
-					val dest = file("src/gen").toPath().resolve(it.name)
-					if (Files.exists(dest)) {
-						MoreFiles.deleteRecursively(dest)
+				for (id in listOf("java", "cpp", "python", "rust", "swift")) {
+					if (file("${buildDir}/generated-proto/main/${id}.zip").exists()) {
+						copy {
+							from(zipTree(file("${buildDir}/generated-proto/main/${id}.zip")))
+							into("src/gen/${id}")
+						}
 					}
-					Files.move(it.toPath(), dest)
 				}
-				file("src/gen/main").delete()
 			}
 		}
 	}
@@ -72,42 +86,6 @@ tasks {
 	javadoc {
 		setFailOnError(false)
 	}
-}
-
-// Create separate rust artifact
-if (System.getenv("S7S_BUILD_PROTO_RUST") == "1") {
-	tasks.register<Zip>("protoZipRust") {
-		dependsOn("generateProto")
-
-		from("src/gen/rust")
-		archiveAppendix.set("rust")
-	}
-}
-
-// Create separate swift artifact
-if (System.getenv("S7S_BUILD_PROTO_SWIFT") == "1") {
-	tasks.register<Zip>("protoZipSwift") {
-		dependsOn("generateProto")
-
-		from("src/gen/swift")
-		archiveAppendix.set("swift")
-	}
-}
-
-// Create separate c++ artifact
-tasks.register<Zip>("protoZipCpp") {
-	dependsOn("generateProto")
-
-	from("src/gen/cpp")
-	archiveAppendix.set("cpp")
-}
-
-// Create separate python artifact
-tasks.register<Zip>("protoZipPython") {
-	dependsOn("generateProto")
-
-	from("src/gen/python")
-	archiveAppendix.set("python")
 }
 
 // Add explicit dependency to supress Gradle warning

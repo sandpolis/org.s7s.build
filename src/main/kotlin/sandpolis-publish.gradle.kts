@@ -44,36 +44,19 @@ publishing {
 				}
 			}
 
-			// Use this for the maven publication
-			// from(components["java"])
-
 			tasks.findByName("pluginArchive")?.let {
 				artifact(it as Zip)
 			} ?: tasks.findByName("jar")?.let {
+				// Use this for the maven publication
+				// from(components["java"])
 				artifact(it as Zip)
 			}
 
-			tasks.findByName("protoZipRust")?.let {
-				artifact(it as Zip) {
-					classifier = "rust"
-				}
-			}
-
-			tasks.findByName("protoZipSwift")?.let {
-				artifact(it as Zip) {
-					classifier = "swift"
-				}
-			}
-
-			tasks.findByName("protoZipCpp")?.let {
-				artifact(it as Zip) {
-					classifier = "cpp"
-				}
-			}
-
-			tasks.findByName("protoZipPython")?.let {
-				artifact(it as Zip) {
-					classifier = "python"
+			for (id in listOf("rust", "swift", "cpp", "python")) {
+				if (System.getenv("S7S_BUILD_PROTO_${id.toUpperCase()}") == "1") {
+					artifact(file("${buildDir}/generated-proto/main/${id}.zip")) {
+						classifier = id
+					}
 				}
 			}
 		}
@@ -90,11 +73,13 @@ publishing {
 	}
 }
 
-if (System.getenv("S7S_NO_SIGNING") != "1") {
-	signing {
-		useInMemoryPgpKeys(System.getenv("SIGNING_PGP_KEY") ?: "", System.getenv("SIGNING_PGP_PASSWORD") ?: "")
-		publishing.publications.forEach {
-			sign(it)
+System.getenv("SIGNING_PGP_KEY")?.let { key ->
+	System.getenv("SIGNING_PGP_PASSWORD")?.let { password ->
+		signing {
+			useInMemoryPgpKeys(key, password)
+			publishing.publications.forEach {
+				sign(it)
+			}
 		}
 	}
 }
