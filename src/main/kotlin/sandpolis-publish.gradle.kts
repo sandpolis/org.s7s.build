@@ -8,6 +8,8 @@
 //                                                                            //
 //============================================================================//
 
+import org.gradle.internal.os.OperatingSystem
+
 plugins {
 	id("maven-publish")
 	id("signing")
@@ -44,12 +46,25 @@ publishing {
 				}
 			}
 
-			tasks.findByName("pluginArchive")?.let {
-				artifact(it as Zip)
-			} ?: tasks.findByName("jar")?.let {
-				// Use this for the maven publication
-				// from(components["java"])
-				artifact(it as Zip)
+			// Special handling for certain modules
+			if (project.name == "com.sandpolis.client.lifegem" || project.name == "com.sandpolis.core.foreign") {
+				artifact(tasks.named<Jar>("jar")) {
+					if (OperatingSystem.current().isLinux()) {
+						classifier = "linux"
+					} else if (OperatingSystem.current().isMacOsX()) {
+						classifier = "mac"
+					} else if (OperatingSystem.current().isWindows()) {
+						classifier = "windows"
+					}
+				}
+			} else if (project.name.startsWith("com.sandpolis.plugin")) {
+				tasks.findByName("pluginArchive")?.let {
+					artifact(it as Zip)
+				}
+			} else {
+				tasks.findByName("jar")?.let {
+					from(components["java"])
+				}
 			}
 
 			for (id in listOf("rust", "swift", "cpp", "python")) {

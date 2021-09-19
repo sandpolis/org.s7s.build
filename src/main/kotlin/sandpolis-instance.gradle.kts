@@ -52,7 +52,7 @@ val writeBuildConfig by tasks.creating(DefaultTask::class) {
 			dependencies=project
 				.getConfigurations()
 				.getByName("runtimeClasspath")
-				?.getResolvedConfiguration()
+				.getResolvedConfiguration()
 				.getResolvedArtifacts()
 				.stream().map {
 					if (it.classifier != null) {
