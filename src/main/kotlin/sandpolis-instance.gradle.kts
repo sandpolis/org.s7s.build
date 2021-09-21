@@ -72,13 +72,13 @@ val writeBuildConfig by tasks.creating(DefaultTask::class) {
 		}
 	}
 }
-
 tasks.findByName("processResources")?.dependsOn(writeBuildConfig)
 
 // Add configuration for protobuf artifacts in non-Java instances
 val proto by configurations.creating
 
-val extractDownloadedProto by tasks.creating(Copy::class) {
+// Extract protobuf downloaded archives
+val assembleProto by tasks.creating(DefaultTask::class) {
 	doLast {
 		for (id in listOf("cpp", "python", "rust", "swift")) {
 			proto.files.filter { it.name.endsWith("-${id}.zip") }.forEach { dep ->
@@ -90,8 +90,9 @@ val extractDownloadedProto by tasks.creating(Copy::class) {
 		}
 	}
 }
-tasks.findByName("assemble")?.dependsOn(extractDownloadedProto)
+tasks.findByName("assemble")?.dependsOn(assembleProto)
 
+// Assemble the instance artifact and all dependencies into build/lib
 tasks.findByName("jar")?.let {
 	task<Sync>("assembleLib") {
 		dependsOn(it)

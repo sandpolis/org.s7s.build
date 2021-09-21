@@ -11,12 +11,29 @@
 import org.ajoberstar.grgit.Grgit
 
 // Set project version according to the latest git tag
-val gitDescribe = Grgit.open {
+project.version = Grgit.open {
 	currentDir = project.getProjectDir().toString()
-}.describe { tags = true }
+}.describe {
+	tags = true
+}?.replaceFirst("^v".toRegex(), "") ?: "0.0.0"
 
-if (gitDescribe == null) {
-	project.version = "0.0.0"
-} else {
-	project.version = gitDescribe.replaceFirst("^v".toRegex(), "")
+// Configure GitHub Packages repositories
+repositories {
+	for (module in listOf(
+		"core.foundation",
+		"core.instance",
+		"core.net",
+		"core.clientserver",
+		"plugin.desktop",
+		"plugin.shell",
+		"plugin.device",
+		"plugin.snapshot")
+	) {
+		maven("https://maven.pkg.github.com/sandpolis/com.sandpolis.${module}") {
+			credentials {
+				username = System.getenv("GITHUB_ACTOR")
+				password = System.getenv("GITHUB_TOKEN")
+			}
+		}
+	}
 }

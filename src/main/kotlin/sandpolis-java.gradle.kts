@@ -52,15 +52,6 @@ tasks.withType<JavaCompile> {
 repositories {
 	mavenLocal()
 	mavenCentral()
-
-	for (dep in listOf("core.foundation")) {
-		maven("https://maven.pkg.github.com/sandpolis/com.sandpolis.${dep}") {
-			credentials {
-				username = System.getenv("GITHUB_ACTOR")
-				password = System.getenv("GITHUB_TOKEN")
-			}
-		}
-	}
 }
 
 // Clear eclipse bin directory on "clean"

@@ -68,7 +68,7 @@ publishing {
 			}
 
 			for (id in listOf("rust", "swift", "cpp", "python")) {
-				if (System.getenv("S7S_BUILD_PROTO_${id.toUpperCase()}") == "1") {
+				if (file("${buildDir}/generated-proto/main/${id}.zip").exists()) {
 					artifact(file("${buildDir}/generated-proto/main/${id}.zip")) {
 						classifier = id
 					}
