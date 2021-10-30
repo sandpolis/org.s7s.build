@@ -16,24 +16,3 @@ project.version = Grgit.open {
 }.describe {
 	tags = true
 }?.replaceFirst("^v".toRegex(), "") ?: "0.0.0"
-
-// Configure GitHub Packages repositories
-repositories {
-	for (module in listOf(
-		"core.foundation",
-		"core.instance",
-		"core.net",
-		"core.clientserver",
-		"plugin.desktop",
-		"plugin.shell",
-		"plugin.device",
-		"plugin.snapshot")
-	) {
-		maven("https://maven.pkg.github.com/sandpolis/com.sandpolis.${module}") {
-			credentials {
-				username = System.getenv("GITHUB_ACTOR")
-				password = System.getenv("GITHUB_TOKEN")
-			}
-		}
-	}
-}

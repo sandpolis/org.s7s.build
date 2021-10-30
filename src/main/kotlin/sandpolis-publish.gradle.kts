@@ -76,13 +76,17 @@ publishing {
 			}
 		}
 	}
-	repositories {
-		maven {
-			name = "GitHubPackages"
-			url = uri("https://maven.pkg.github.com/sandpolis/${project.name}")
-			credentials {
-				username = System.getenv("GITHUB_ACTOR")
-				password = System.getenv("GITHUB_TOKEN")
+	System.getenv("SONATYPE_USERNAME")?.let { user ->
+		System.getenv("SONATYPE_PASSWORD")?.let { pass ->
+			repositories {
+				maven {
+					name = "CentralStaging"
+					url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
+					credentials {
+						username = user
+						password = pass
+					}
+				}
 			}
 		}
 	}

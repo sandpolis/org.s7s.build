@@ -73,8 +73,10 @@ class OidClass(val path: String) {
 
             t = TypeSpec
                 .classBuilder(className)
-                .addModifiers(PUBLIC, STATIC)
-                .superclass(ClassName.get("com.sandpolis.core.instance.state.oid", "Oid"))
+                .addModifiers(PUBLIC, STATIC, FINAL)
+
+            // Add OID field
+            t.addField(FieldSpec.builder(ClassName.get("com.sandpolis.core.instance.state.oid", "Oid"), "_oid", PRIVATE).build())
 
             // Add constructor
             t.addMethod(
@@ -82,7 +84,7 @@ class OidClass(val path: String) {
                     .constructorBuilder()
                     .addModifiers(PRIVATE)
                     .addParameter(String::class.java, "path")
-                    .addStatement("super(\"\$L\", path.replaceAll(\"^/+\", \"\").split(\"/\"))", project.name)
+                    .addStatement("_oid = Oid.of(\"\$L:\" + path)", project.name)
                     .build()
             )
 
@@ -95,7 +97,7 @@ class OidClass(val path: String) {
                         PUBLIC,
                         FINAL
                     )
-                    .initializer("new \$L(\$L\"/\$L\")", className, if (path.count { it == '/'} > 2) "pathString() + " else "" , className.removeSuffix("Oid").toLowerCase())
+                    .initializer("new \$L(\$L\"/\$L\")", className, if (path.count { it == '/'} > 2) "_oid.pathString() + " else "" , className.removeSuffix("Oid").toLowerCase())
                     .build()
             )
 
@@ -177,7 +179,7 @@ fun processAttributes(oidClass: TypeSpec.Builder, document: DocumentSpec) {
                     attr.name, PUBLIC, FINAL
                 )
                 .addJavadoc(attr.description ?: "")
-                .initializer(CodeBlock.of("relative(\"\$L\")", attr.name))
+                .initializer(CodeBlock.of("_oid.relative(\"\$L\")", attr.name))
                 .build()
         )
 
