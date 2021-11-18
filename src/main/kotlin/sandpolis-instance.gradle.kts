@@ -82,9 +82,10 @@ val assembleProto by tasks.creating(DefaultTask::class) {
 	doLast {
 		for (id in listOf("cpp", "python", "rust", "swift")) {
 			proto.files.filter { it.name.endsWith("-${id}.zip") }.forEach { dep ->
+				val module = dep.name.substringBefore("-")
 				copy {
 					from(zipTree(dep))
-					into("src/gen/${id}")
+					into("src/gen/${id}/${module}")
 				}
 			}
 		}

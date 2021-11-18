@@ -48,12 +48,6 @@ tasks.withType<JavaCompile> {
 	options.javaModuleVersion.set(provider { project.version as String })
 }
 
-// Add repository configuration
-repositories {
-	mavenLocal()
-	mavenCentral()
-}
-
 // Clear eclipse bin directory on "clean"
 tasks.findByName("clean")?.doLast {
 	delete("bin")

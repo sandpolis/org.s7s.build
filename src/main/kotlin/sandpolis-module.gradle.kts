@@ -16,3 +16,9 @@ project.version = Grgit.open {
 }.describe {
 	tags = true
 }?.replaceFirst("^v".toRegex(), "") ?: "0.0.0"
+
+// Add repository configuration
+repositories {
+	mavenLocal()
+	mavenCentral()
+}

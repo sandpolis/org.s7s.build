@@ -21,7 +21,7 @@ repositories {
 dependencies {
 
 	// For sandpolis-protobuf plugin
-	implementation("com.google.protobuf:protobuf-gradle-plugin:0.8.17")
+	implementation("com.google.protobuf:protobuf-gradle-plugin:0.8.18")
 
 	// For sandpolis-module plugin
 	implementation("org.ajoberstar.grgit:grgit-core:4.1.0")
