@@ -7,8 +7,10 @@
 //  as published by the Mozilla Foundation.                                   //
 //                                                                            //
 //============================================================================//
+package com.sandpolis.build
 
 import org.ajoberstar.grgit.Grgit
+import org.gradle.plugins.ide.eclipse.model.EclipseModel
 
 // Set project version according to the latest git tag
 project.version = Grgit.open {
@@ -21,4 +23,49 @@ project.version = Grgit.open {
 repositories {
 	mavenLocal()
 	mavenCentral()
+}
+
+// Apply Java configuration if needed
+if (pluginManager.hasPlugin("java")) {
+
+	pluginManager.apply("eclipse")
+	pluginManager.apply("idea")
+
+	configure<JavaPluginExtension> {
+		modularity.inferModulePath.set(true)
+
+		withJavadocJar()
+		withSourcesJar()
+
+		toolchain {
+			languageVersion.set(JavaLanguageVersion.of(17))
+		}
+	}
+
+	// Configure unit testing
+	tasks.withType<Test> {
+		useJUnitPlatform()
+
+		testLogging {
+			setExceptionFormat("full")
+		}
+	}
+
+	// Configure Eclipse plugin
+	configure<EclipseModel> {
+		project {
+			name = project.name
+			comment = project.name
+		}
+	}
+
+	// Clear eclipse bin directory on "clean"
+	tasks.findByName("clean")?.doLast {
+		delete("bin")
+	}
+
+	// Configure module version
+	tasks.withType<JavaCompile> {
+		options.javaModuleVersion.set(provider { project.version as String })
+	}
 }

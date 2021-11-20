@@ -7,6 +7,7 @@
 //  as published by the Mozilla Foundation.                                   //
 //                                                                            //
 //============================================================================//
+package com.sandpolis.build
 
 import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.creating

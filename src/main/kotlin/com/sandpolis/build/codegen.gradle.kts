@@ -7,6 +7,7 @@
 //  as published by the Mozilla Foundation.                                   //
 //                                                                            //
 //============================================================================//
+package com.sandpolis.build
 
 import com.google.common.base.CaseFormat
 import com.squareup.javapoet.*
