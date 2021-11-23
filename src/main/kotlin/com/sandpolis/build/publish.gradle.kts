@@ -47,7 +47,7 @@ publishing {
 				}
 			}
 
-			// Special handling for certain modules
+			// Special handling for platform-specific modules
 			if (project.name == "com.sandpolis.client.lifegem" || project.name == "com.sandpolis.core.foreign") {
 				artifact(tasks.named<Jar>("jar")) {
 					if (OperatingSystem.current().isLinux()) {
@@ -58,18 +58,25 @@ publishing {
 						classifier = "windows"
 					}
 				}
-			} else if (project.name.startsWith("com.sandpolis.plugin")) {
+			}
+
+			// Special handling for plugin modules
+			else if (project.name.startsWith("com.sandpolis.plugin")) {
 				tasks.findByName("pluginArchive")?.let {
 					artifact(it as Zip)
 				}
-			} else {
+			}
+
+			// Standard handling for regular modules
+			else {
 				tasks.findByName("jar")?.let {
 					from(components["java"])
 				}
 			}
 
+			// Add any configured protobuf artifacts
 			for (id in listOf("rust", "swift", "cpp", "python")) {
-				if (file("${buildDir}/generated-proto/main/${id}.zip").exists()) {
+				if (System.getenv("S7S_BUILD_PROTO_${id.toUpperCase()}") == "1") {
 					artifact(file("${buildDir}/generated-proto/main/${id}.zip")) {
 						classifier = id
 					}

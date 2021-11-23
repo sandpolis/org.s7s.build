@@ -14,6 +14,7 @@ plugins {
 	id("java-gradle-plugin")
 	id("maven-publish")
 	id("com.gradle.plugin-publish") version "0.16.0"
+	id("org.ajoberstar.grgit") version "4.1.0"
 }
 
 repositories {
@@ -23,13 +24,13 @@ repositories {
 
 dependencies {
 
-	// For sandpolis-protobuf plugin
+	// For protobuf plugin
 	implementation("com.google.protobuf:protobuf-gradle-plugin:0.8.18")
 
-	// For sandpolis-module plugin
+	// For module plugin
 	implementation("org.ajoberstar.grgit:grgit-core:4.1.0")
 
-	// For sandpolis-codegen plugin
+	// For codegen plugin
 	implementation("com.squareup:javapoet:1.11.1")
 	implementation("com.google.guava:guava:30.1-jre")
 	implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
@@ -42,7 +43,13 @@ pluginBundle {
 }
 
 group = "com.sandpolis"
-version = "0.1"
+
+// Set project version according to the latest git tag
+version = org.ajoberstar.grgit.Grgit.open {
+	currentDir = project.getProjectDir().toString()
+}.describe {
+	tags = true
+}?.replaceFirst("^v".toRegex(), "") ?: "0.0"
 
 gradlePlugin {
 	plugins {
