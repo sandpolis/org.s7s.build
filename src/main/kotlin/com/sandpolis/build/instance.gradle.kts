@@ -15,14 +15,27 @@ import kotlinx.serialization.encodeToString
 
 @Serializable
 data class BuildConfig(
-	val build_platform: String,
-	val build_timestamp: Long,
-	val instance_version: String,
-	val gradle_version: String,
-	val java_version: String? = null,
-	val kotlin_version: String? = null,
-	val rust_version: String? = null,
-	val dependencies: List<String>?
+	val platform: String,
+	val timestamp: Long,
+	val versions: VersionCfg,
+	val dependencies: List<DependencyCfg>
+)
+
+@Serializable
+data class VersionCfg(
+	val instance: String,
+	val gradle: String,
+	val java: String? = null,
+	val kotlin: String? = null,
+	val rust: String? = null
+)
+
+@Serializable
+data class DependencyCfg(
+	val group: String,
+	val artifact: String,
+	val version: String,
+	val classifier: String?
 )
 
 val writeBuildConfig by tasks.creating(DefaultTask::class) {
@@ -31,19 +44,23 @@ val writeBuildConfig by tasks.creating(DefaultTask::class) {
 		val json = BuildConfig(
 
 			// Build platform
-			build_platform="${System.getProperty("os.name")} (${System.getProperty("os.arch")})",
+			platform="${System.getProperty("os.name")} (${System.getProperty("os.arch")})",
 
 			// Build time
-			build_timestamp=System.currentTimeMillis(),
+			timestamp=System.currentTimeMillis(),
 
-			// Instance version
-			instance_version=project.version.toString(),
+			// Version info
+			versions=VersionCfg(
 
-			// Gradle version
-			gradle_version=project.getGradle().getGradleVersion(),
+				// Instance version
+				instance=project.version.toString(),
 
-			// Java version
-			java_version="${System.getProperty("java.version")} (${System.getProperty("java.vendor")})",
+				// Gradle version
+				gradle=project.getGradle().getGradleVersion(),
+
+				// Java version
+				java="${System.getProperty("java.version")} (${System.getProperty("java.vendor")})"
+			),
 
 			// Runtime dependencies
 			dependencies=project
@@ -52,20 +69,21 @@ val writeBuildConfig by tasks.creating(DefaultTask::class) {
 				.getResolvedConfiguration()
 				.getResolvedArtifacts()
 				.stream().map {
-					if (it.classifier != null) {
-						"${it.moduleVersion.id.group}:${it.moduleVersion.id.name}:${it.moduleVersion.id.version}:${it.classifier}"
-					} else {
-						"${it.moduleVersion.id.group}:${it.moduleVersion.id.name}:${it.moduleVersion.id.version}"
-					}
+					DependencyCfg (
+						group=it.moduleVersion.id.group,
+						artifact=it.moduleVersion.id.name,
+						version=it.moduleVersion.id.version,
+						classifier=it.classifier
+					)
 				}.toList()
 		)
 
 		// Write object
 		if (project.file("res").exists()) {
-			project.file("res/build.json").writeText(Json.encodeToString(json))
+			project.file("res/com.sandpolis.build.json").writeText(Json.encodeToString(json))
 		} else {
 			project.file("src/gen/resources").mkdirs()
-			project.file("src/gen/resources/build.json").writeText(Json.encodeToString(json))
+			project.file("src/gen/resources/com.sandpolis.build.json").writeText(Json.encodeToString(json))
 		}
 	}
 }
