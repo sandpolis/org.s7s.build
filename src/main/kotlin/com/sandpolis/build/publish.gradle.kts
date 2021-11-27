@@ -23,6 +23,13 @@ publishing {
 			artifactId = project.name.replace("com.sandpolis.", "")
 			version = project.version.toString()
 
+			// Use resolved versions instead of declared
+			versionMapping {
+				allVariants {
+					fromResolutionResult()
+				}
+			}
+
 			pom {
 				name.set(project.name)
 				description.set("${project.name} module")
