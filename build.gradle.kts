@@ -13,7 +13,7 @@ plugins {
 	kotlin("plugin.serialization") version "1.5.20"
 	id("java-gradle-plugin")
 	id("maven-publish")
-	id("com.gradle.plugin-publish") version "0.16.0"
+	id("com.gradle.plugin-publish") version "0.18.0"
 	id("org.ajoberstar.grgit") version "4.1.0"
 }
 
@@ -31,8 +31,8 @@ dependencies {
 	implementation("org.ajoberstar.grgit:grgit-core:4.1.0")
 
 	// For codegen plugin
-	implementation("com.squareup:javapoet:1.11.1")
-	implementation("com.google.guava:guava:30.1-jre")
+	implementation("com.squareup:javapoet:1.13.0")
+	implementation("com.google.guava:guava:31.0.1-jre")
 	implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
 }
 
@@ -50,6 +50,12 @@ version = org.ajoberstar.grgit.Grgit.open {
 }.describe {
 	tags = true
 }?.replaceFirst("^v".toRegex(), "") ?: "0.0"
+
+// Set publishing credentials
+ext {
+	set("gradle.publish.key", System.getenv("PLUGIN_PUBLISH_KEY"))
+	set("gradle.publish.secret", System.getenv("PLUGIN_PUBLISH_SECRET"))
+}
 
 gradlePlugin {
 	plugins {

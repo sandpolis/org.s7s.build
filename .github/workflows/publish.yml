@@ -1,0 +1,25 @@
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  publish-linux:
+    name: Publish release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Initialize Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: 17
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Publish release
+        uses: eskatos/gradle-command-action@v1
+        with:
+          arguments: publishPlugins --no-daemon
+        env:
+          PLUGIN_PUBLISH_KEY: ${{ secrets.PLUGIN_PUBLISH_KEY }}
+          PLUGIN_PUBLISH_SECRET: ${{ secrets.PLUGIN_PUBLISH_SECRET }}
