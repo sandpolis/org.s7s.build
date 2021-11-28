@@ -10,7 +10,7 @@
 
 plugins {
 	`kotlin-dsl`
-	kotlin("plugin.serialization") version "1.5.20"
+	kotlin("plugin.serialization") version "1.6.0"
 	id("java-gradle-plugin")
 	id("maven-publish")
 	id("com.gradle.plugin-publish") version "0.18.0"
