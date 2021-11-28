@@ -9,9 +9,11 @@
 //============================================================================//
 package com.sandpolis.build
 
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
+import com.google.common.hash.Hashing;
+import com.google.common.io.Files
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.Serializable
 
 @Serializable
 data class BuildConfig(
@@ -35,7 +37,8 @@ data class DependencyCfg(
 	val group: String,
 	val artifact: String,
 	val version: String,
-	val classifier: String?
+	val classifier: String?,
+	val hash: String
 )
 
 val writeBuildConfig by tasks.creating(DefaultTask::class) {
@@ -70,10 +73,11 @@ val writeBuildConfig by tasks.creating(DefaultTask::class) {
 				.getResolvedArtifacts()
 				.stream().map {
 					DependencyCfg (
-						group=it.moduleVersion.id.group,
-						artifact=it.moduleVersion.id.name,
+						group=if (it.moduleVersion.id.name.startsWith("com.sandpolis.")) "com.sandpolis" else it.moduleVersion.id.group,
+						artifact=it.moduleVersion.id.name.replace("^com\\.sandpolis\\.".toRegex(), ""),
 						version=it.moduleVersion.id.version,
-						classifier=it.classifier
+						classifier=it.classifier,
+						hash=Files.asByteSource(it.getFile()).hash(Hashing.sha256()).toString()
 					)
 				}.toList()
 		)
