@@ -55,7 +55,7 @@ publishing {
 			}
 
 			// Special handling for platform-specific modules
-			if (project.name == "com.sandpolis.client.lifegem" || project.name == "com.sandpolis.core.foreign") {
+			if (project.name == "com.sandpolis.client.lifegem") {
 				artifact(tasks.named<Jar>("jar")) {
 					if (OperatingSystem.current().isLinux()) {
 						classifier = "linux"
