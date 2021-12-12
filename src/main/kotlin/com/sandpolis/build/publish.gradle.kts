@@ -69,9 +69,7 @@ publishing {
 
 			// Special handling for plugin modules
 			else if (project.name.startsWith("com.sandpolis.plugin")) {
-				tasks.findByName("pluginArchive")?.let {
-					artifact(it as Zip)
-				}
+				artifact(tasks.getByName("pluginArchive") as Zip)
 			}
 
 			// Standard handling for regular modules
