@@ -1,10 +1,9 @@
 //============================================================================//
 //                                                                            //
-//                         Copyright © 2015 Sandpolis                         //
+//            Copyright © 2015 - 2022 Sandpolis Software Foundation           //
 //                                                                            //
 //  This source file is subject to the terms of the Mozilla Public License    //
-//  version 2. You may not use this file except in compliance with the MPL    //
-//  as published by the Mozilla Foundation.                                   //
+//  version 2. You may not use this file except in compliance with the MPLv2. //
 //                                                                            //
 //============================================================================//
 
@@ -37,12 +36,12 @@ dependencies {
 }
 
 pluginBundle {
-    website = "https://sandpolis.com"
-    vcsUrl = "https://github.com/sandpolis/com.sandpolis.build"
-    tags = listOf("sandpolis")
+	website = "https://sandpolis.com"
+	vcsUrl = "https://github.com/sandpolis/org.s7s.build"
+	tags = listOf("sandpolis")
 }
 
-group = "com.sandpolis"
+group = "org.s7s"
 
 // Set project version according to the latest git tag
 version = org.ajoberstar.grgit.Grgit.open {
@@ -59,41 +58,41 @@ ext {
 
 gradlePlugin {
 	plugins {
-		getByName("com.sandpolis.build.publish") {
-			id = "com.sandpolis.build.publish"
+		getByName("org.s7s.build.publish") {
+			id = "org.s7s.build.publish"
 			displayName = "Publish Plugin"
 			description = "This plugin applies publishing configuration for Sandpolis modules"
-			implementationClass = "com.sandpolis.build.PublishPlugin"
+			implementationClass = "org.s7s.build.PublishPlugin"
 		}
-		getByName("com.sandpolis.build.instance") {
-			id = "com.sandpolis.build.instance"
+		getByName("org.s7s.build.instance") {
+			id = "org.s7s.build.instance"
 			displayName = "Instance Plugin"
 			description = "This plugin applies configuration specific to Sandpolis instance modules"
-			implementationClass = "com.sandpolis.build.InstancePlugin"
+			implementationClass = "org.s7s.build.InstancePlugin"
 		}
-		getByName("com.sandpolis.build.codegen") {
-			id = "com.sandpolis.build.codegen"
+		getByName("org.s7s.build.codegen") {
+			id = "org.s7s.build.codegen"
 			displayName = "Code Generator Plugin"
 			description = "This plugin applies configuration for code generators"
-			implementationClass = "com.sandpolis.build.CodegenPlugin"
+			implementationClass = "org.s7s.build.CodegenPlugin"
 		}
-		getByName("com.sandpolis.build.module") {
-			id = "com.sandpolis.build.module"
+		getByName("org.s7s.build.module") {
+			id = "org.s7s.build.module"
 			displayName = "Module Plugin"
 			description = "This plugin applies configuration for all Sandpolis modules"
-			implementationClass = "com.sandpolis.build.ModulePlugin"
+			implementationClass = "org.s7s.build.ModulePlugin"
 		}
-		getByName("com.sandpolis.build.protobuf") {
-			id = "com.sandpolis.build.protobuf"
+		getByName("org.s7s.build.protobuf") {
+			id = "org.s7s.build.protobuf"
 			displayName = "Protocol Buffer Plugin"
 			description = "This plugin applies configuration for modules containing protobuf code"
-			implementationClass = "com.sandpolis.build.ProtobufPlugin"
+			implementationClass = "org.s7s.build.ProtobufPlugin"
 		}
-		getByName("com.sandpolis.build.plugin") {
-			id = "com.sandpolis.build.plugin"
+		getByName("org.s7s.build.plugin") {
+			id = "org.s7s.build.plugin"
 			displayName = "Plugin Plugin"
 			description = "This plugin applies configuration for building Sandpolis plugins"
-			implementationClass = "com.sandpolis.build.PluginPlugin"
+			implementationClass = "org.s7s.build.PluginPlugin"
 		}
 	}
 }

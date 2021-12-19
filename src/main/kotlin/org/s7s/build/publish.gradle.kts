@@ -7,7 +7,7 @@
 //  as published by the Mozilla Foundation.                                   //
 //                                                                            //
 //============================================================================//
-package com.sandpolis.build
+package org.s7s.build
 
 import org.gradle.internal.os.OperatingSystem
 
@@ -19,8 +19,8 @@ plugins {
 publishing {
 	publications {
 		create<MavenPublication>(project.name.split(".").last()) {
-			groupId = "com.sandpolis"
-			artifactId = project.name.replace("com.sandpolis.", "")
+			groupId = "org.s7s"
+			artifactId = project.name.replace("org.s7s.", "")
 			version = project.version.toString()
 
 			// Use resolved versions instead of declared
@@ -55,7 +55,7 @@ publishing {
 			}
 
 			// Special handling for platform-specific modules
-			if (project.name == "com.sandpolis.client.lifegem") {
+			if (project.name == "org.s7s.instance.client.desktop") {
 				artifact(tasks.named<Jar>("jar")) {
 					if (OperatingSystem.current().isLinux()) {
 						classifier = "linux"
@@ -68,7 +68,7 @@ publishing {
 			}
 
 			// Special handling for plugin modules
-			else if (project.name.startsWith("com.sandpolis.plugin")) {
+			else if (project.name.startsWith("org.s7s.plugin")) {
 				artifact(tasks.getByName("pluginArchive") as Zip)
 			}
 

@@ -7,7 +7,7 @@
 //  as published by the Mozilla Foundation.                                   //
 //                                                                            //
 //============================================================================//
-package com.sandpolis.build
+package org.s7s.build
 
 import com.google.common.io.MoreFiles
 import com.google.protobuf.gradle.*

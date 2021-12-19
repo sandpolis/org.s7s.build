@@ -7,7 +7,7 @@
 //  as published by the Mozilla Foundation.                                   //
 //                                                                            //
 //============================================================================//
-package com.sandpolis.build
+package org.s7s.build
 
 import com.google.common.base.CaseFormat
 import com.squareup.javapoet.*
@@ -77,7 +77,7 @@ class OidClass(val path: String) {
                 .addModifiers(PUBLIC, STATIC, FINAL)
 
             // Add OID field
-            t.addField(FieldSpec.builder(ClassName.get("com.sandpolis.core.instance.state.oid", "Oid"), "_oid", PRIVATE).build())
+            t.addField(FieldSpec.builder(ClassName.get("org.s7s.core.instance.state.oid", "Oid"), "_oid", PRIVATE).build())
 
             // Add constructor
             t.addMethod(
@@ -176,7 +176,7 @@ fun processAttributes(oidClass: TypeSpec.Builder, document: DocumentSpec) {
         oidClass.addField(
             FieldSpec
                 .builder(
-                    ClassName.get("com.sandpolis.core.instance.state.oid", "Oid"),
+                    ClassName.get("org.s7s.core.instance.state.oid", "Oid"),
                     attr.name, PUBLIC, FINAL
                 )
                 .addJavadoc(attr.description ?: "")
@@ -187,7 +187,7 @@ fun processAttributes(oidClass: TypeSpec.Builder, document: DocumentSpec) {
         oidClass.addField(
             FieldSpec
                 .builder(
-                    ClassName.get("com.sandpolis.core.instance.state.oid", "Oid"),
+                    ClassName.get("org.s7s.core.instance.state.oid", "Oid"),
                     attr.name.toUpperCase(), PUBLIC, FINAL, STATIC
                 )
                 .addJavadoc(attr.description ?: "")

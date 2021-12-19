@@ -7,7 +7,7 @@
 //  as published by the Mozilla Foundation.                                   //
 //                                                                            //
 //============================================================================//
-package com.sandpolis.build
+package org.s7s.build
 
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files
@@ -73,7 +73,7 @@ val writeBuildConfig by tasks.creating(DefaultTask::class) {
 				.getResolvedArtifacts()
 				.stream().map {
 					DependencyCfg (
-						group=if (it.moduleVersion.id.name.startsWith("com.sandpolis.")) "com.sandpolis" else it.moduleVersion.id.group,
+						group=if (it.moduleVersion.id.name.startsWith("org.s7s.")) "org.s7s" else it.moduleVersion.id.group,
 						artifact=it.moduleVersion.id.name.replace("^com\\.sandpolis\\.".toRegex(), ""),
 						version=it.moduleVersion.id.version,
 						classifier=it.classifier,
@@ -84,10 +84,10 @@ val writeBuildConfig by tasks.creating(DefaultTask::class) {
 
 		// Write object
 		if (project.file("res").exists()) {
-			project.file("res/com.sandpolis.build.json").writeText(Json.encodeToString(json))
+			project.file("res/org.s7s.build.json").writeText(Json.encodeToString(json))
 		} else {
 			project.file("src/gen/resources").mkdirs()
-			project.file("src/gen/resources/com.sandpolis.build.json").writeText(Json.encodeToString(json))
+			project.file("src/gen/resources/org.s7s.build.json").writeText(Json.encodeToString(json))
 		}
 	}
 }
