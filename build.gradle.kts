@@ -79,7 +79,7 @@ gradlePlugin {
 		getByName("org.s7s.build.module") {
 			id = "org.s7s.build.module"
 			displayName = "Sandpolis Module Plugin"
-			description = "Applies configuration for all Sandpolis modules"
+			description = "Applies configuration for Sandpolis modules"
 			implementationClass = "org.s7s.build.ModulePlugin"
 		}
 		getByName("org.s7s.build.protobuf") {
@@ -93,6 +93,12 @@ gradlePlugin {
 			displayName = "Sandpolis Plugin Plugin"
 			description = "Applies configuration for building Sandpolis plugins"
 			implementationClass = "org.s7s.build.PluginPlugin"
+		}
+		getByName("org.s7s.build.jextract") {
+			id = "org.s7s.build.jextract"
+			displayName = "Sandpolis Jextract Plugin"
+			description = "Applies Jextract configuration for Sandpolis modules"
+			implementationClass = "org.s7s.build.JextractPlugin"
 		}
 	}
 }
