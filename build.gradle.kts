@@ -36,7 +36,7 @@ dependencies {
 }
 
 pluginBundle {
-	website = "https://sandpolis.com"
+	website = "https://sandpolis.org"
 	vcsUrl = "https://github.com/sandpolis/org.s7s.build"
 	tags = listOf("sandpolis")
 }
@@ -60,38 +60,38 @@ gradlePlugin {
 	plugins {
 		getByName("org.s7s.build.publish") {
 			id = "org.s7s.build.publish"
-			displayName = "Publish Plugin"
-			description = "This plugin applies publishing configuration for Sandpolis modules"
+			displayName = "Sandpolis Publish Plugin"
+			description = "Applies publishing configuration for Sandpolis modules"
 			implementationClass = "org.s7s.build.PublishPlugin"
 		}
 		getByName("org.s7s.build.instance") {
 			id = "org.s7s.build.instance"
-			displayName = "Instance Plugin"
-			description = "This plugin applies configuration specific to Sandpolis instance modules"
+			displayName = "Sandpolis Instance Plugin"
+			description = "Applies configuration specific to Sandpolis instance modules"
 			implementationClass = "org.s7s.build.InstancePlugin"
 		}
 		getByName("org.s7s.build.codegen") {
 			id = "org.s7s.build.codegen"
-			displayName = "Code Generator Plugin"
-			description = "This plugin applies configuration for code generators"
+			displayName = "Sandpolis Code Generator Plugin"
+			description = "Applies configuration for code generators"
 			implementationClass = "org.s7s.build.CodegenPlugin"
 		}
 		getByName("org.s7s.build.module") {
 			id = "org.s7s.build.module"
-			displayName = "Module Plugin"
-			description = "This plugin applies configuration for all Sandpolis modules"
+			displayName = "Sandpolis Module Plugin"
+			description = "Applies configuration for all Sandpolis modules"
 			implementationClass = "org.s7s.build.ModulePlugin"
 		}
 		getByName("org.s7s.build.protobuf") {
 			id = "org.s7s.build.protobuf"
-			displayName = "Protocol Buffer Plugin"
-			description = "This plugin applies configuration for modules containing protobuf code"
+			displayName = "Sandpolis Protocol Buffer Plugin"
+			description = "Applies configuration for modules containing protobuf code"
 			implementationClass = "org.s7s.build.ProtobufPlugin"
 		}
 		getByName("org.s7s.build.plugin") {
 			id = "org.s7s.build.plugin"
-			displayName = "Plugin Plugin"
-			description = "This plugin applies configuration for building Sandpolis plugins"
+			displayName = "Sandpolis Plugin Plugin"
+			description = "Applies configuration for building Sandpolis plugins"
 			implementationClass = "org.s7s.build.PluginPlugin"
 		}
 	}
