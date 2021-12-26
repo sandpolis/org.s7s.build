@@ -8,13 +8,24 @@
 //============================================================================//
 package org.s7s.build
 
-import com.google.common.base.CaseFormat
 import com.squareup.javapoet.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.Modifier.*
+
+plugins {
+    id("java")
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs("src/gen/java")
+        }
+    }
+}
 
 @Serializable
 data class AttributeSpec(
@@ -29,22 +40,42 @@ data class AttributeSpec(
 
 @Serializable
 data class DocumentSpec(
-    val name: String,
+    val collection: Boolean = true,
     val attributes: List<AttributeSpec>
 )
 
-class OidClass(val path: String) {
+val rootName = project.name.split(".").last().capitalize() + "Oids"
 
-    private val rootName = project.name.split(".").last().capitalize() + "Oids"
+class OidClass(val parent: OidClass?, val name: String, val spec: DocumentSpec?) {
+
     private var children = HashMap<String, OidClass>()
-    private var spec: DocumentSpec? = null
 
-    fun generate(parent: TypeSpec.Builder? = null): TypeSpec {
+    fun oid(): String {
+        if (parent != null && spec != null) {
+            if (spec.collection) {
+                return "${parent.oid()}/${name}(null)"
+            } else {
+                return "${parent.oid()}/${name}"
+            }
+        }
+
+        return ""
+    }
+
+    fun generateRust(): String {
+        return ""
+    }
+
+    fun generateSwift(): String {
+        return ""
+    }
+
+    fun generateJava(parent: TypeSpec.Builder? = null): TypeSpec {
 
         val t: TypeSpec.Builder
 
         // Root special case
-        if (path == "/") {
+        if (parent == null) {
 
             t = TypeSpec.classBuilder(rootName).addModifiers(PUBLIC)
 
@@ -66,17 +97,15 @@ class OidClass(val path: String) {
                     .build()
             )
         } else {
-            val pathUpper = path.split("/").filter { it != "*" && it != "" }
-                .map { CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, "${it}_oid") }
-            val className = pathUpper.takeLast(1).first()
-            val classPackage = if (pathUpper.size > 1) "." + pathUpper.dropLast(1).joinToString(".") else ""
+
+            val classPackage = oid().replace("(null)", "").split("/").filter { it != "" }.map { it + "Oid" }.joinToString(".")
 
             t = TypeSpec
-                .classBuilder(className)
+                .classBuilder(name + "Oid")
                 .addModifiers(PUBLIC, STATIC, FINAL)
 
             // Add OID field
-            t.addField(FieldSpec.builder(ClassName.get("org.s7s.core.instance.state.oid", "Oid"), "_oid", PRIVATE).build())
+            t.addField(FieldSpec.builder(ClassName.get("org.s7s.core.instance.state.oid", "Oid"), "_oid", PUBLIC /*,FINAL*/).build())
 
             // Add constructor
             t.addMethod(
@@ -89,72 +118,95 @@ class OidClass(val path: String) {
             )
 
             // Add OID field to parent
-            parent?.addField(
+            parent.addField(
                 FieldSpec
                     .builder(
-                        ClassName.get("${project.name}.state.${rootName}${classPackage}", className),
-                        className.removeSuffix("Oid").toLowerCase(),
+                        ClassName.bestGuess("${project.name}.state.${rootName}.${classPackage}"),
+                        name,
                         PUBLIC,
                         FINAL
                     )
-                    .initializer("new \$L(\$L\"/\$L\")", className, if (path.count { it == '/'} > 2) "_oid.pathString() + " else "" , className.removeSuffix("Oid").toLowerCase())
+                    .initializer("new \$L(\$L\"/\$L\")", name + "Oid", if (path.count { it == '/'} > 2) "_oid.pathString() + " else "" , name)
                     .build()
             )
 
+            // Process attributes
             spec?.let {
-                processAttributes(t, it)
+                it.attributes.forEach { attr ->
+
+                    // Validate name
+                    if (!SourceVersion.isIdentifier(attr.name)) {
+                        throw RuntimeException("Invalid name: " + attr.name)
+                    }
+
+                    // Create fields
+                    t.addField(
+                        FieldSpec
+                            .builder(
+                                ClassName.get("org.s7s.core.instance.state.oid", "Oid"),
+                                attr.name, PUBLIC, FINAL
+                            )
+                            .addJavadoc(attr.description ?: "")
+                            .initializer(CodeBlock.of("_oid.relative(\"\$L\")", attr.name))
+                            .build()
+                    )
+
+                    t.addField(
+                        FieldSpec
+                            .builder(
+                                ClassName.get("org.s7s.core.instance.state.oid", "Oid"),
+                                attr.name.toUpperCase(), PUBLIC, FINAL, STATIC
+                            )
+                            .addJavadoc(attr.description ?: "")
+                            .initializer(CodeBlock.of("Oid.of(\"\$L:\$L\")", project.name, this.oid() + "/" + attr.name))
+                            .build()
+                    )
+                }
             }
 
-            if (path.endsWith("/*")) {
+            if (spec!!.collection) {
 
-                parent?.addMethod(
+                parent.addMethod(
                     MethodSpec
-                        .methodBuilder(className.removeSuffix("Oid").toLowerCase())
+                        .methodBuilder(name)
                         .addModifiers(PUBLIC)
                         .addParameter(String::class.java, "id")
-                        .returns(ClassName.get("${project.name}.state.${rootName}${classPackage}", className))
+                        .returns(ClassName.bestGuess("${project.name}.state.${rootName}.${classPackage}"))
                         .addStatement(
                             "return new \$L(this.toString() + \"/\$L/\" + id)",
-                            className,
-                            className.removeSuffix("Oid").toLowerCase()
+                            name + "Oid",
+                            name
                         )
                         .build()
                 )
             }
         }
 
+        // Generate all children
         children.forEach { (_, v) ->
-            t.addType(v.generate(t))
+            t.addType(v.generateJava(t))
         }
 
         return t.build()
     }
 
-    fun add(document: DocumentSpec): OidClass {
+    fun add(name: String, document: DocumentSpec): OidClass {
 
-        if (document.name.contains("//")
-            || document.name.contains("**")
-            || document.name.endsWith("/")
-            || document.name.startsWith("*")
-            || !document.name.startsWith("/")
+        if (name.contains("//")
+            || name.contains("**")
+            || name.endsWith("/")
+            || name.startsWith("*")
         ) {
-            throw RuntimeException("Illegal name: " + document.name)
+            throw RuntimeException("Illegal name: " + name)
         }
 
-        if (path == document.name) {
-            // Base case
-            spec = document
+        if (children.containsKey(name.split("/").first())) {
+            children[name.split("/").first()]!!.add(name.substringAfter("/"), document)
         } else {
-            val first = document.name.drop(path.length).replace("/*", "*").split("/").first { !it.isEmpty() }
-
-            if (!children.contains(first)) {
-                if (path == "/") {
-                    children[first] = OidClass("/" + first.replace("*", "/*")).add(document)
-                } else {
-                    children[first] = OidClass("${path}/" + first.replace("*", "/*")).add(document)
-                }
+            if (name.contains("/")) {
+                children[name.split("/").first()] = OidClass(this, name.split("/").first(), document).add(name.substringAfter("/"), document)
             } else {
-                children[first]?.add(document)
+                children[name.split("/").first()] = OidClass(this, name.split("/").first(), document)
             }
         }
 
@@ -162,60 +214,30 @@ class OidClass(val path: String) {
     }
 }
 
-fun processAttributes(oidClass: TypeSpec.Builder, document: DocumentSpec) {
-
-    document.attributes.forEach { attr ->
-
-        // Validate name
-        if (!SourceVersion.isIdentifier(attr.name)) {
-            throw RuntimeException("Invalid name: " + attr.name)
-        }
-
-        // Create fields
-        oidClass.addField(
-            FieldSpec
-                .builder(
-                    ClassName.get("org.s7s.core.instance.state.oid", "Oid"),
-                    attr.name, PUBLIC, FINAL
-                )
-                .addJavadoc(attr.description ?: "")
-                .initializer(CodeBlock.of("_oid.relative(\"\$L\")", attr.name))
-                .build()
-        )
-
-        oidClass.addField(
-            FieldSpec
-                .builder(
-                    ClassName.get("org.s7s.core.instance.state.oid", "Oid"),
-                    attr.name.toUpperCase(), PUBLIC, FINAL, STATIC
-                )
-                .addJavadoc(attr.description ?: "")
-                .initializer(CodeBlock.of("Oid.of(\"\$L:\$L\")", project.name, document.name + "/" + attr.name))
-                .build()
-        )
-    }
-}
-
 project.afterEvaluate {
 
-    val specification = project.file("state.json")
-
-    if (specification.exists()) {
+    if (project.file("src/main/json").exists()) {
         val generateOids by tasks.creating(DefaultTask::class) {
 
             doLast {
 
-                // Load the specification
-                val spec = Json.decodeFromString<List<DocumentSpec>>(specification.readText())
+                val root = OidClass(null, "/", null)
 
-                // Convert spec into tree for easier class generation
-                val root = OidClass("/")
-                spec.forEach(root::add)
+                // Load the specification (sorted to ensure the top of the tree is processed first)
+                project.fileTree("src/main/json").files.sortedBy{ it.absolutePath }.forEach {
+                    root.add(it.absolutePath.substringAfter("src/main/json/").substringBefore(".json"), Json.decodeFromString<DocumentSpec>(it.readText()))
+                }
 
-                // Write root class
-                JavaFile.builder(project.name + ".state", root.generate())
+                // Write Java class
+                JavaFile.builder(project.name + ".state", root.generateJava())
                     .addFileComment("This source file was automatically generated by the Sandpolis codegen plugin.")
                     .skipJavaLangImports(true).build().writeTo(project.file("src/gen/java"))
+
+                // Write Rust struct
+                //project.file("src/gen/rust/oid.rs").writeString(root.generateRust())
+
+                // Write Swift class
+                //project.file("src/gen/rust/oid.swift").writeString(root.generateSwift())
             }
         }
 
