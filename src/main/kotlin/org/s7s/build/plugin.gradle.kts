@@ -34,7 +34,7 @@ open class ConfigExtension {
     lateinit var description: String
 }
 
-val cert = project.file(project.name + ".cert").readText()
+val cert = project.file("plugin.cert").readText()
         .replace("\\R".toRegex(), "")
         .replace("-----BEGIN CERTIFICATE-----", "")
         .replace("-----END CERTIFICATE-----", "")
