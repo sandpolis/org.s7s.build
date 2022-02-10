@@ -27,7 +27,7 @@ dependencies {
 	implementation("com.google.protobuf:protobuf-gradle-plugin:0.8.18")
 
 	// For module plugin
-	implementation("org.ajoberstar.grgit:grgit-core:4.1.0")
+	implementation("org.ajoberstar.grgit:grgit-core:5.0.0")
 
 	// For codegen plugin
 	implementation("com.squareup:javapoet:1.13.0")
