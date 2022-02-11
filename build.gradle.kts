@@ -13,7 +13,7 @@ plugins {
 	id("java-gradle-plugin")
 	id("maven-publish")
 	id("com.gradle.plugin-publish") version "0.18.0"
-	id("org.ajoberstar.grgit") version "4.1.1"
+	id("org.ajoberstar.grgit") version "5.0.0"
 }
 
 repositories {
