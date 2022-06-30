@@ -12,7 +12,7 @@ plugins {
 	kotlin("plugin.serialization") version "1.6.10"
 	id("java-gradle-plugin")
 	id("maven-publish")
-	id("com.gradle.plugin-publish") version "0.18.0"
+	id("com.gradle.plugin-publish") version "1.0.0"
 	id("org.ajoberstar.grgit") version "4.1.1"
 }
 
