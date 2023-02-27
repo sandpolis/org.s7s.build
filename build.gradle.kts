@@ -32,7 +32,7 @@ dependencies {
 	// For codegen plugin
 	implementation("com.squareup:javapoet:1.13.0")
 	implementation("com.google.guava:guava:31.0.1-jre")
-	implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.1")
+	implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
 }
 
 pluginBundle {
